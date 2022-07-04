@@ -1,4 +1,4 @@
-# snw_measurements
+# dt_measurements
 
 ## Structure
 
@@ -16,3 +16,5 @@ Be sure to have `numpy` and `matplotlib` installed, everything else should have 
 Afterwards simply go to directory and run:
 
 `python3 analyze.py`
+
+In order to have an easy way of generating the plots for the diploma-thesis `thesisplot.py` can be used to regenerate all the plots used in the thesis.
