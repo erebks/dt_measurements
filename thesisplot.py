@@ -43,7 +43,10 @@ def plot():
     plt.ylabel("[%]")
     plt.grid(linestyle='--', axis='y')
     plt.savefig("phase_errors.svg")
-    plt.show()
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
     # Print barchart of packetloss
 #    plt.bar(range(len(packetloss[1])), packetloss[1])
@@ -54,6 +57,9 @@ def plot():
 #    plt.grid(linestyle='--', axis='y')
 #    plt.savefig("packetloss.svg")
 #    plt.show()
+#    plt.clf()
+#    plt.cla()
+#    plt.close()
 
     # Print hist of jitter
     y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_11["msgs"]), float)
@@ -65,7 +71,36 @@ def plot():
     plt.xlabel("ms")
     plt.grid(True)
     plt.savefig("hist_jitter.svg")
-    plt.show()
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # Print delta of 10s
+    plt.plot(list(ele["lora_msg_id"] for ele in mea_12["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"]), "b.-")
+    plt.xlabel('msg')
+    plt.ylabel('gateway delta timestamp [s]')
+    plt.tick_params('y')
+    plt.grid(True)
+    plt.savefig("delta_10s.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # Print hist of 10s
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"]), float)
+    y2 = ((y2) - mea_12_xor_dpsk_10s.analyze.NOMINAL_S) * 1000
+    y2 = y2[y2 > -1000]
+
+    plt.hist(y2, bins=mea_12_xor_dpsk_10s.analyze.HIST_BINS, color='b')
+    plt.xlabel("ms")
+    plt.grid(True)
+    plt.savefig("hist_10s.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
     # Print delta of 100ms
     plt.plot(list(ele["lora_msg_id"] for ele in mea_19["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_19["msgs"]), "b.-")
@@ -75,7 +110,24 @@ def plot():
     plt.tick_params('y')
     plt.grid(True)
     plt.savefig("delta_100ms.svg")
-    plt.show()
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # Print hist of 100ms
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_19["msgs"]), float)
+    y2 = ((y2) - mea_19_xor_dpsk_100ms.analyze.NOMINAL_S) * 1000
+    y2 = y2[y2 > -200]
+
+    plt.hist(y2, bins=mea_19_xor_dpsk_100ms.analyze.HIST_BINS, color='b')
+    plt.xlabel("ms")
+    plt.grid(True)
+    plt.savefig("hist_100ms.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
     # Print hist of all
 #    fig, axs = plt.subplots(2, 4, figsize=(10,5))
@@ -138,7 +190,10 @@ def plot():
     axs[1][3].set_title("h) 10 s")
     axs[1][3].set_xlabel("ms", fontsize=8)
     plt.savefig("hist.svg")
-    plt.show()
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
 
 if __name__ == "__main__":
