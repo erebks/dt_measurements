@@ -44,6 +44,24 @@ def getPhase_nBits(deltaTimestamp, nominal, phaseDelta, tolerance, bits):
     print("Can't find encoded bit")
     return None
 
+def _conv_timestamp(s):
+    # Convert timestamps from the format given by TTN to internal one
+    # Example:
+    # "2022-06-23T20:54:01.621829032Z" -> len() = 30
+    # "2022-06-23T20:49:01.625Z"
+
+    # datetime.strptime() can only work with fractionals
+    # at a maximum of 6
+
+    # Delete Z at end
+    s = s[:-1]
+
+    # Delete fractual seconds that are too long
+    if (len(s) > 26):
+        s = s[:26]
+
+    return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
+
 def readMessages(data, nominal, tolerance, printMatches):
 
     msgs = []
@@ -75,16 +93,12 @@ def readMessages(data, nominal, tolerance, printMatches):
 
         for gw in element["result"]["uplink_message"]["rx_metadata"]:
             if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
-                a = gw["time"]
-        a = a[:-4]
-        a = datetime.datetime.strptime(a, "%Y-%m-%dT%H:%M:%S.%f")
+                a = _conv_timestamp(gw["time"])
 
         msg["gw_timestamp_not_compensated"] = a.timestamp()
         msg["gw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
 
-        a = element["result"]["received_at"]
-        a = a[:-4]
-        a = datetime.datetime.strptime(a, "%Y-%m-%dT%H:%M:%S.%f")
+        a = _conv_timestamp(element["result"]["received_at"])
         msg["nw_timestamp_not_compensated"] = a.timestamp()
         msg["nw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
 
@@ -202,16 +216,12 @@ def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches):
 
         for gw in element["result"]["uplink_message"]["rx_metadata"]:
             if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
-                a = gw["time"]
-        a = a[:-4]
-        a = datetime.datetime.strptime(a, "%Y-%m-%dT%H:%M:%S.%f")
+                a = _conv_timestamp(gw["time"])
 
         msg["gw_timestamp_not_compensated"] = a.timestamp()
         msg["gw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
 
-        a = element["result"]["received_at"]
-        a = a[:-4]
-        a = datetime.datetime.strptime(a, "%Y-%m-%dT%H:%M:%S.%f")
+        a = _conv_timestamp(element["result"]["received_at"])
         msg["nw_timestamp_not_compensated"] = a.timestamp()
         msg["nw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
 
