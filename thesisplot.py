@@ -15,6 +15,11 @@ import mea_16_xor_dpsk_50ms.analyze
 import mea_17_xor_dpsk_60ms.analyze
 import mea_18_xor_dpsk_70ms.analyze
 import mea_19_xor_dpsk_100ms.analyze
+import mea_20_xor_dpsk_nojumpback_100ms.analyze
+import mea_21_xor_dpsk_nojumpback_50ms.analyze
+import mea_22_xor_8bit.analyze
+import mea_24_xor_2bit.analyze
+import mea_25_xor_4bit.analyze
 import analyze
 
 # Ignore NONE in list
@@ -31,6 +36,11 @@ def plot():
     mea_17 = mea_17_xor_dpsk_60ms.analyze.analyze(mea_17_xor_dpsk_60ms.analyze.readMeasurements("mea_17_xor_dpsk_60ms/out.json"))
     mea_18 = mea_18_xor_dpsk_70ms.analyze.analyze(mea_18_xor_dpsk_70ms.analyze.readMeasurements("mea_18_xor_dpsk_70ms/out.json"))
     mea_19 = mea_19_xor_dpsk_100ms.analyze.analyze(mea_19_xor_dpsk_100ms.analyze.readMeasurements("mea_19_xor_dpsk_100ms/out.json"))
+    mea_20 = mea_20_xor_dpsk_nojumpback_100ms.analyze.analyze(mea_20_xor_dpsk_nojumpback_100ms.analyze.readMeasurements("mea_20_xor_dpsk_nojumpback_100ms/nojump_100ms.json"))
+    mea_21 = mea_21_xor_dpsk_nojumpback_50ms.analyze.analyze(mea_21_xor_dpsk_nojumpback_50ms.analyze.readMeasurements("mea_21_xor_dpsk_nojumpback_50ms/nojump_50ms.json"))
+    mea_22 = mea_22_xor_8bit.analyze.analyze(mea_22_xor_8bit.analyze.readMeasurements("mea_22_xor_8bit/8bit.json"))
+    mea_24 = mea_24_xor_2bit.analyze.analyze(mea_24_xor_2bit.analyze.readMeasurements("mea_24_xor_2bit/2bit.json"))
+    mea_25 = mea_25_xor_4bit.analyze.analyze(mea_25_xor_4bit.analyze.readMeasurements("mea_25_xor_4bit/4bit.json"))
 
     packetloss = analyze.getPacketLosses()
     ber = analyze.getBER()
@@ -190,10 +200,49 @@ def plot():
     axs[3][1].set_title("h) 10 s")
     axs[3][1].set_xlabel("ms", fontsize=8)
     plt.savefig("hist.svg")
-    plt.show()
+#    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
+
+    # nojumpback measurements plots
+    # 100ms delta
+    plt.plot(list(ele["lora_msg_id"] for ele in mea_20["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_20["msgs"]), "b.-")
+    plt.xlabel('msg')
+    plt.ylabel('gateway delta timestamp [s]')
+    plt.tick_params('y')
+    plt.grid(True)
+    plt.savefig("delta_100ms_nojumpback.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # 50ms + 100ms hist
+    fig, axs = plt.subplots(1, 2, figsize=(7,3))
+    fig.tight_layout(h_pad=2)
+
+    # 50ms
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_20["msgs"]), float)
+    y2 = ((y2) - mea_20_xor_dpsk_nojumpback_100ms.analyze.NOMINAL_S) * 1000
+    axs[0].hist(y2, bins=mea_20_xor_dpsk_nojumpback_100ms.analyze.HIST_BINS, color='b')
+    axs[0].set_title("a) 50 ms")
+    axs[0].set_xlabel("ms", fontsize=8)
+
+    # 100ms
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_21["msgs"]), float)
+    y2 = ((y2) - mea_21_xor_dpsk_nojumpback_50ms.analyze.NOMINAL_S) * 1000
+    axs[1].hist(y2, bins=mea_21_xor_dpsk_nojumpback_50ms.analyze.HIST_BINS, color='b')
+    axs[1].set_title("b) 100 ms")
+    axs[1].set_xlabel("ms", fontsize=8)
+    plt.savefig("hist_nojumpback.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # nbit plots
+
 
 
 if __name__ == "__main__":
