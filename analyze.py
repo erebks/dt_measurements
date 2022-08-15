@@ -6,15 +6,20 @@ import copy
 
 #import helper
 
-import mea_1_jitter.analyze
-import mea_2_xor_dpsk.analyze
-import mea_3_xor_dpsk_20ms.analyze
-import mea_4_xor_dpsk_50ms.analyze
-import mea_5_xor_dpsk_100ms.analyze
-import mea_6_xor_dpsk_30ms.analyze
-import mea_7_xor_dpsk_40ms.analyze
-import mea_8_xor_dpsk_60ms.analyze
-import mea_9_xor_dpsk_70ms.analyze
+import mea_11_jitter.analyze
+import mea_12_xor_dpsk_10s.analyze
+import mea_13_xor_dpsk_20ms.analyze
+import mea_14_xor_dpsk_30ms.analyze
+import mea_15_xor_dpsk_40ms.analyze
+import mea_16_xor_dpsk_50ms.analyze
+import mea_17_xor_dpsk_60ms.analyze
+import mea_18_xor_dpsk_70ms.analyze
+import mea_19_xor_dpsk_100ms.analyze
+import mea_20_xor_dpsk_nojumpback_100ms.analyze
+import mea_21_xor_dpsk_nojumpback_50ms.analyze
+import mea_22_xor_8bit.analyze
+import mea_24_xor_2bit.analyze
+import mea_25_xor_4bit.analyze
 
 # Ignore NONE in list
 import warnings
@@ -22,15 +27,15 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 def getPacketLosses():
 
-    mea_1 = mea_1_jitter.analyze.analyze(mea_1_jitter.analyze.readMeasurements("mea_1_jitter/out.json"))
-    mea_2 = mea_2_xor_dpsk.analyze.analyze(mea_2_xor_dpsk.analyze.readMeasurements("mea_2_xor_dpsk/220209_xor_dpsk.json"))
-    mea_3 = mea_3_xor_dpsk_20ms.analyze.analyze(mea_3_xor_dpsk_20ms.analyze.readMeasurements("mea_3_xor_dpsk_20ms/220219_xor_dpsk_20ms.json"))
-    mea_4 = mea_4_xor_dpsk_50ms.analyze.analyze(mea_4_xor_dpsk_50ms.analyze.readMeasurements("mea_4_xor_dpsk_50ms/220220_xor_dpsk_50ms.json"))
-    mea_5 = mea_5_xor_dpsk_100ms.analyze.analyze(mea_5_xor_dpsk_100ms.analyze.readMeasurements("mea_5_xor_dpsk_100ms/220221_xor_dpsk_100ms.json"))
-    mea_6 = mea_6_xor_dpsk_30ms.analyze.analyze(mea_6_xor_dpsk_30ms.analyze.readMeasurements("mea_6_xor_dpsk_30ms/220223_xor_dpsk_30ms.json"))
-    mea_7 = mea_7_xor_dpsk_40ms.analyze.analyze(mea_7_xor_dpsk_40ms.analyze.readMeasurements("mea_7_xor_dpsk_40ms/220224_xor_dpsk_40ms.json"))
-    mea_8 = mea_8_xor_dpsk_60ms.analyze.analyze(mea_8_xor_dpsk_60ms.analyze.readMeasurements("mea_8_xor_dpsk_60ms/220225_xor_dpsk_60ms.json"))
-    mea_9 = mea_9_xor_dpsk_70ms.analyze.analyze(mea_9_xor_dpsk_70ms.analyze.readMeasurements("mea_9_xor_dpsk_70ms/220226_xor_dpsk_70ms.json"))
+    mea_11 = mea_11_jitter.analyze.analyze(mea_11_jitter.analyze.readMeasurements("mea_11_jitter/out.json"))
+    mea_12 = mea_12_xor_dpsk_10s.analyze.analyze(mea_12_xor_dpsk_10s.analyze.readMeasurements("mea_12_xor_dpsk_10s/out.json"))
+    mea_13 = mea_13_xor_dpsk_20ms.analyze.analyze(mea_13_xor_dpsk_20ms.analyze.readMeasurements("mea_13_xor_dpsk_20ms/out.json"))
+    mea_14 = mea_14_xor_dpsk_30ms.analyze.analyze(mea_14_xor_dpsk_30ms.analyze.readMeasurements("mea_14_xor_dpsk_30ms/out.json"))
+    mea_15 = mea_15_xor_dpsk_40ms.analyze.analyze(mea_15_xor_dpsk_40ms.analyze.readMeasurements("mea_15_xor_dpsk_40ms/out.json"))
+    mea_16 = mea_16_xor_dpsk_50ms.analyze.analyze(mea_16_xor_dpsk_50ms.analyze.readMeasurements("mea_16_xor_dpsk_50ms/out.json"))
+    mea_17 = mea_17_xor_dpsk_60ms.analyze.analyze(mea_17_xor_dpsk_60ms.analyze.readMeasurements("mea_17_xor_dpsk_60ms/out.json"))
+    mea_18 = mea_18_xor_dpsk_70ms.analyze.analyze(mea_18_xor_dpsk_70ms.analyze.readMeasurements("mea_18_xor_dpsk_70ms/out.json"))
+    mea_19 = mea_19_xor_dpsk_100ms.analyze.analyze(mea_19_xor_dpsk_100ms.analyze.readMeasurements("mea_19_xor_dpsk_100ms/out.json"))
 
     packetlosses = [
         [
@@ -45,29 +50,30 @@ def getPacketLosses():
             "10s",
         ],
         [
-            (mea_1["numMsgsLost"] / len(mea_1["msgs"])) * 100,
-            (mea_3["numMsgsLost"] / len(mea_3["msgs"])) * 100,
-            (mea_6["numMsgsLost"] / len(mea_6["msgs"])) * 100,
-            (mea_7["numMsgsLost"] / len(mea_7["msgs"])) * 100,
-            (mea_4["numMsgsLost"] / len(mea_4["msgs"])) * 100,
-            (mea_8["numMsgsLost"] / len(mea_8["msgs"])) * 100,
-            (mea_9["numMsgsLost"] / len(mea_9["msgs"])) * 100,
-            (mea_5["numMsgsLost"] / len(mea_5["msgs"])) * 100,
-            (mea_2["numMsgsLost"] / len(mea_2["msgs"])) * 100,
+            (mea_11["numMsgsLost"] / len(mea_11["msgs"])) * 100,
+            (mea_13["numMsgsLost"] / len(mea_13["msgs"])) * 100,
+            (mea_14["numMsgsLost"] / len(mea_14["msgs"])) * 100,
+            (mea_15["numMsgsLost"] / len(mea_15["msgs"])) * 100,
+            (mea_16["numMsgsLost"] / len(mea_16["msgs"])) * 100,
+            (mea_17["numMsgsLost"] / len(mea_17["msgs"])) * 100,
+            (mea_18["numMsgsLost"] / len(mea_18["msgs"])) * 100,
+            (mea_19["numMsgsLost"] / len(mea_19["msgs"])) * 100,
+            (mea_12["numMsgsLost"] / len(mea_12["msgs"])) * 100,
         ]
     ]
 
     return packetlosses
 
 def getBER():
-    mea_2 = mea_2_xor_dpsk.analyze.analyze(mea_2_xor_dpsk.analyze.readMeasurements("mea_2_xor_dpsk/220209_xor_dpsk.json"))
-    mea_3 = mea_3_xor_dpsk_20ms.analyze.analyze(mea_3_xor_dpsk_20ms.analyze.readMeasurements("mea_3_xor_dpsk_20ms/220219_xor_dpsk_20ms.json"))
-    mea_4 = mea_4_xor_dpsk_50ms.analyze.analyze(mea_4_xor_dpsk_50ms.analyze.readMeasurements("mea_4_xor_dpsk_50ms/220220_xor_dpsk_50ms.json"))
-    mea_5 = mea_5_xor_dpsk_100ms.analyze.analyze(mea_5_xor_dpsk_100ms.analyze.readMeasurements("mea_5_xor_dpsk_100ms/220221_xor_dpsk_100ms.json"))
-    mea_6 = mea_6_xor_dpsk_30ms.analyze.analyze(mea_6_xor_dpsk_30ms.analyze.readMeasurements("mea_6_xor_dpsk_30ms/220223_xor_dpsk_30ms.json"))
-    mea_7 = mea_7_xor_dpsk_40ms.analyze.analyze(mea_7_xor_dpsk_40ms.analyze.readMeasurements("mea_7_xor_dpsk_40ms/220224_xor_dpsk_40ms.json"))
-    mea_8 = mea_8_xor_dpsk_60ms.analyze.analyze(mea_8_xor_dpsk_60ms.analyze.readMeasurements("mea_8_xor_dpsk_60ms/220225_xor_dpsk_60ms.json"))
-    mea_9 = mea_9_xor_dpsk_70ms.analyze.analyze(mea_9_xor_dpsk_70ms.analyze.readMeasurements("mea_9_xor_dpsk_70ms/220226_xor_dpsk_70ms.json"))
+    mea_11 = mea_11_jitter.analyze.analyze(mea_11_jitter.analyze.readMeasurements("mea_11_jitter/out.json"))
+    mea_12 = mea_12_xor_dpsk_10s.analyze.analyze(mea_12_xor_dpsk_10s.analyze.readMeasurements("mea_12_xor_dpsk_10s/out.json"))
+    mea_13 = mea_13_xor_dpsk_20ms.analyze.analyze(mea_13_xor_dpsk_20ms.analyze.readMeasurements("mea_13_xor_dpsk_20ms/out.json"))
+    mea_14 = mea_14_xor_dpsk_30ms.analyze.analyze(mea_14_xor_dpsk_30ms.analyze.readMeasurements("mea_14_xor_dpsk_30ms/out.json"))
+    mea_15 = mea_15_xor_dpsk_40ms.analyze.analyze(mea_15_xor_dpsk_40ms.analyze.readMeasurements("mea_15_xor_dpsk_40ms/out.json"))
+    mea_16 = mea_16_xor_dpsk_50ms.analyze.analyze(mea_16_xor_dpsk_50ms.analyze.readMeasurements("mea_16_xor_dpsk_50ms/out.json"))
+    mea_17 = mea_17_xor_dpsk_60ms.analyze.analyze(mea_17_xor_dpsk_60ms.analyze.readMeasurements("mea_17_xor_dpsk_60ms/out.json"))
+    mea_18 = mea_18_xor_dpsk_70ms.analyze.analyze(mea_18_xor_dpsk_70ms.analyze.readMeasurements("mea_18_xor_dpsk_70ms/out.json"))
+    mea_19 = mea_19_xor_dpsk_100ms.analyze.analyze(mea_19_xor_dpsk_100ms.analyze.readMeasurements("mea_19_xor_dpsk_100ms/out.json"))
 
     ber = [
         [
@@ -81,14 +87,14 @@ def getBER():
             "10s",
         ],
         [
-            (mea_3["numPhasesErrors"] / mea_3["numPhasesDecoded"]) * 100,
-            (mea_6["numPhasesErrors"] / mea_6["numPhasesDecoded"]) * 100,
-            (mea_7["numPhasesErrors"] / mea_7["numPhasesDecoded"]) * 100,
-            (mea_4["numPhasesErrors"] / mea_4["numPhasesDecoded"]) * 100,
-            (mea_8["numPhasesErrors"] / mea_8["numPhasesDecoded"]) * 100,
-            (mea_9["numPhasesErrors"] / mea_9["numPhasesDecoded"]) * 100,
-            (mea_5["numPhasesErrors"] / mea_5["numPhasesDecoded"]) * 100,
-            (mea_2["numPhasesErrors"] / mea_2["numPhasesDecoded"]) * 100,
+            (mea_13["numPhasesErrors"] / mea_13["numPhasesDecoded"]) * 100,
+            (mea_14["numPhasesErrors"] / mea_14["numPhasesDecoded"]) * 100,
+            (mea_15["numPhasesErrors"] / mea_15["numPhasesDecoded"]) * 100,
+            (mea_16["numPhasesErrors"] / mea_16["numPhasesDecoded"]) * 100,
+            (mea_17["numPhasesErrors"] / mea_17["numPhasesDecoded"]) * 100,
+            (mea_18["numPhasesErrors"] / mea_18["numPhasesDecoded"]) * 100,
+            (mea_19["numPhasesErrors"] / mea_19["numPhasesDecoded"]) * 100,
+            (mea_12["numPhasesErrors"] / mea_12["numPhasesDecoded"]) * 100,
         ]
     ]
     return ber

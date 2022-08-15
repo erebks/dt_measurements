@@ -1,5 +1,6 @@
 import json
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 import sys
 import numpy as np
 import copy
@@ -53,7 +54,7 @@ def plot():
     plt.ylabel("[%]")
     plt.grid(linestyle='--', axis='y')
     plt.savefig("phase_errors.svg")
-#    plt.show()
+    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
@@ -87,13 +88,13 @@ def plot():
     plt.close()
 
     # Print delta of 10s
-    plt.plot(list(ele["lora_msg_id"] for ele in mea_12["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"]), "b.-")
-    plt.xlabel('msg')
-    plt.ylabel('gateway delta timestamp [s]')
+    plt.plot(list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"]), list(ele["lora_msg_id"] for ele in mea_12["msgs"]), "b.-")
+    plt.xlabel('gateway delta timestamp [s]')
+    plt.ylabel('msg')
     plt.tick_params('y')
     plt.grid(True)
     plt.savefig("delta_10s.svg")
-#    plt.show()
+    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
@@ -223,16 +224,16 @@ def plot():
     fig.tight_layout(h_pad=2)
 
     # 50ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_20["msgs"]), float)
-    y2 = ((y2) - mea_20_xor_dpsk_nojumpback_100ms.analyze.NOMINAL_S) * 1000
-    axs[0].hist(y2, bins=mea_20_xor_dpsk_nojumpback_100ms.analyze.HIST_BINS, color='b')
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_21["msgs"]), float)
+    y2 = ((y2) - mea_21_xor_dpsk_nojumpback_50ms.analyze.NOMINAL_S) * 1000
+    axs[0].hist(y2, bins=mea_21_xor_dpsk_nojumpback_50ms.analyze.HIST_BINS, color='b')
     axs[0].set_title("a) 50 ms")
     axs[0].set_xlabel("ms", fontsize=8)
 
     # 100ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_21["msgs"]), float)
-    y2 = ((y2) - mea_21_xor_dpsk_nojumpback_50ms.analyze.NOMINAL_S) * 1000
-    axs[1].hist(y2, bins=mea_21_xor_dpsk_nojumpback_50ms.analyze.HIST_BINS, color='b')
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_20["msgs"]), float)
+    y2 = ((y2) - mea_20_xor_dpsk_nojumpback_100ms.analyze.NOMINAL_S) * 1000
+    axs[1].hist(y2, bins=mea_20_xor_dpsk_nojumpback_100ms.analyze.HIST_BINS, color='b')
     axs[1].set_title("b) 100 ms")
     axs[1].set_xlabel("ms", fontsize=8)
     plt.savefig("hist_nojumpback.svg")
@@ -242,6 +243,51 @@ def plot():
     plt.close()
 
     # nbit plots
+    # plot deltas of 2 bit encoding
+    plt.plot(list(ele["lora_msg_id"] for ele in mea_24["msgs"])[900:1100], list(ele["gw_timestamp_delta"] for ele in mea_24["msgs"])[900:1100], "b.-")
+    plt.xlabel('msg')
+    plt.ylabel('gateway delta timestamp [s]')
+    plt.tick_params('y')
+    plt.grid(True)
+    plt.savefig("delta_2bit.svg")
+    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # plot hist of all nbits
+#    fig, axs = plt.subplots(2, 2, figsize=(7,3))
+    fig = plt.figure()
+    fig.tight_layout(h_pad=2)
+    gs = GridSpec(2,2, figure=fig)
+    ax1 = fig.add_subplot(gs[0,0])
+    ax2 = fig.add_subplot(gs[0,1])
+    ax3 = fig.add_subplot(gs[1,:])
+
+    # 2bit
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_24["msgs"]), float)
+    y2 = ((y2) - mea_24_xor_2bit.analyze.NOMINAL_S) * 1000
+    ax1.hist(y2, bins=mea_24_xor_2bit.analyze.HIST_BINS, color='b')
+    ax1.set_title("a) 2 bit")
+
+    # 4bit
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_25["msgs"]), float)
+    y2 = ((y2) - mea_25_xor_4bit.analyze.NOMINAL_S) * 1000
+    ax2.hist(y2, bins=mea_25_xor_4bit.analyze.HIST_BINS, color='b')
+    ax2.set_title("b) 4 bit")
+
+    # 4bit
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_22["msgs"]), float)
+    y2 = ((y2) - mea_22_xor_8bit.analyze.NOMINAL_S) * 1000
+    ax3.hist(y2, bins=mea_22_xor_8bit.analyze.HIST_BINS, color='b')
+    ax3.set_title("c) 8 bit")
+    ax3.set_xlabel("ms", fontsize=8)
+
+    plt.savefig("hist_nbit.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
 
 
