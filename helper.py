@@ -4,8 +4,8 @@ import datetime
 import numpy as np
 
 # Calculate watermark of sensordata
-def calcWatermark(oldData, newData, key=0xa5a5):
-    reg = (oldData >> 13) ^ (newData >> 13) ^ key
+def calcWatermark(oldData, newData, key=0xa5a5, shift=13):
+    reg = (oldData >> shift) ^ (newData >> shift) ^ key
     return reg
 
 # Calculate phase of sensordata
@@ -185,7 +185,7 @@ def readMessages(data, nominal, tolerance, printMatches):
 
     return {"msgs": msgs, "numMsgsLost": numMsgsLost, "numPhasesDecoded": phases["decoded"], "numPhasesErrors": phases["errors"]}
 
-def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches):
+def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches, watermarkShift=13):
 
     msgs = []
     numMsgsLost = 0
@@ -251,7 +251,7 @@ def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches):
                 msg["mcu_timestamp_delta_s"] = msg["mcu_timestamp_delta"] / 1000
 
                 # Calc watermark
-                msg["calculation"]["watermark"] = calcWatermark(preMsg["mcu_timestamp"], msg["mcu_timestamp"])
+                msg["calculation"]["watermark"] = calcWatermark(preMsg["mcu_timestamp"], msg["mcu_timestamp"], shift=watermarkShift)
 
                 # Get extracted phase
                 msg["extraction"]["phase"] = getPhase_nBits(msg["gw_timestamp_delta"], nominal, phaseDelta, tolerance, bits)
@@ -270,7 +270,7 @@ def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches):
                 msg["mcu_timestamp_delta_s"] = msg["mcu_timestamp_delta"] / 1000
 
                 # Calc watermark and phase
-                msg["calculation"]["watermark"] = calcWatermark(preMsg["mcu_timestamp"], msg["mcu_timestamp"])
+                msg["calculation"]["watermark"] = calcWatermark(preMsg["mcu_timestamp"], msg["mcu_timestamp"], shift=watermarkShift)
                 msg["calculation"]["phase"] = calcPhase_nBits(msg["calculation"]["watermark"], bits)
                 msg["extraction"]["phase"] = getPhase_nBits(msg["gw_timestamp_delta"], nominal, phaseDelta, tolerance, bits)
 
