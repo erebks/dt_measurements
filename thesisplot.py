@@ -21,6 +21,7 @@ import mea_21_xor_dpsk_nojumpback_50ms.analyze
 import mea_22_xor_8bit.analyze
 import mea_24_xor_2bit.analyze
 import mea_25_xor_4bit.analyze
+import mea_27_xor_4bit_lfsr_fix.analyze
 import analyze
 
 # Ignore NONE in list
@@ -42,6 +43,7 @@ def plot():
     mea_22 = mea_22_xor_8bit.analyze.analyze(mea_22_xor_8bit.analyze.readMeasurements("mea_22_xor_8bit/8bit.json"))
     mea_24 = mea_24_xor_2bit.analyze.analyze(mea_24_xor_2bit.analyze.readMeasurements("mea_24_xor_2bit/2bit.json"))
     mea_25 = mea_25_xor_4bit.analyze.analyze(mea_25_xor_4bit.analyze.readMeasurements("mea_25_xor_4bit/4bit.json"))
+    mea_27 = mea_27_xor_4bit_lfsr_fix.analyze.analyze(mea_27_xor_4bit_lfsr_fix.analyze.readMeasurements("mea_27_xor_4bit_lfsr_fix/4bit_lfsr.json"))
 
     packetloss = analyze.getPacketLosses()
     ber = analyze.getBER()
@@ -54,7 +56,7 @@ def plot():
     plt.ylabel("[%]")
     plt.grid(linestyle='--', axis='y')
     plt.savefig("phase_errors.svg")
-    plt.show()
+#    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
@@ -80,21 +82,45 @@ def plot():
     plt.hist(y2, bins=mea_11_jitter.analyze.HIST_BINS, color='b')
 #    plt.title("Jitter: Histogram of gateway timestamps")
     plt.xlabel("ms")
+    plt.ylabel("frequency")
 #    plt.grid(True)
     plt.savefig("hist_jitter.svg")
-#    plt.show()
+    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # Print PDF of jitter
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_11["msgs"]), float)
+    y2 = ((y2) - mea_11_jitter.analyze.NOMINAL_S) * 1000
+    y2 = y2[2:] # Delete first, this is an outlier
+
+    count, bins, ignored = plt.hist(y2, bins=mea_11_jitter.analyze.HIST_BINS, color='b', density=True)
+
+    mu = np.nanmean(y2)
+    sigma = np.nanstd(y2)
+    print("mean: {0}".format(mu))
+    print("standard dev: {0}".format(sigma))
+
+    plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (bins - mu)**2 / (2 * sigma**2) ), color='r')
+#    plt.title("Jitter: Histogram of gateway timestamps")
+    plt.xlabel("ms")
+    plt.ylabel("density")
+#    plt.grid(True)
+    plt.savefig("hist_jitter_pdf.svg")
+    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
 
     # Print delta of 10s
-    plt.plot(list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"]), list(ele["lora_msg_id"] for ele in mea_12["msgs"]), "b.-")
-    plt.xlabel('gateway delta timestamp [s]')
-    plt.ylabel('msg')
+    plt.plot(list(ele["lora_msg_id"] for ele in mea_12["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"]), "b.-")
+    plt.xlabel('msg')
+    plt.ylabel('IPD at gateway [s]')
     plt.tick_params('y')
     plt.grid(True)
     plt.savefig("delta_10s.svg")
-    plt.show()
+#    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
@@ -106,6 +132,7 @@ def plot():
 
     plt.hist(y2, bins=mea_12_xor_dpsk_10s.analyze.HIST_BINS, color='b')
     plt.xlabel("ms")
+    plt.ylabel("frequency")
 #    plt.grid(True)
     plt.savefig("hist_10s.svg")
 #    plt.show()
@@ -117,7 +144,7 @@ def plot():
     plt.plot(list(ele["lora_msg_id"] for ele in mea_19["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_19["msgs"]), "b.-")
 #    plt.title("100ms: Delta timestamps")
     plt.xlabel('msg')
-    plt.ylabel('gateway delta timestamp [s]')
+    plt.ylabel('IPD at gateway [s]')
     plt.tick_params('y')
     plt.grid(True)
     plt.savefig("delta_100ms.svg")
@@ -133,6 +160,7 @@ def plot():
 
     plt.hist(y2, bins=mea_19_xor_dpsk_100ms.analyze.HIST_BINS, color='b')
     plt.xlabel("ms")
+    plt.ylabel("frequency")
 #    plt.grid(True)
     plt.savefig("hist_100ms.svg")
 #    plt.show()
@@ -150,6 +178,7 @@ def plot():
     y2 = ((y2) - mea_13_xor_dpsk_20ms.analyze.NOMINAL_S) * 1000
     axs[0][0].hist(y2, bins=mea_13_xor_dpsk_20ms.analyze.HIST_BINS, color='b')
     axs[0][0].set_title("a) 20 ms")
+    axs[0][0].set_ylabel("frequency")
 #    axs[0][0].set_xlabel("ms", fontsize=8)
 
     # 30ms
@@ -210,7 +239,7 @@ def plot():
     # 100ms delta
     plt.plot(list(ele["lora_msg_id"] for ele in mea_20["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_20["msgs"]), "b.-")
     plt.xlabel('msg')
-    plt.ylabel('gateway delta timestamp [s]')
+    plt.ylabel('IPD at gateway [s]')
     plt.tick_params('y')
     plt.grid(True)
     plt.savefig("delta_100ms_nojumpback.svg")
@@ -229,6 +258,8 @@ def plot():
     axs[0].hist(y2, bins=mea_21_xor_dpsk_nojumpback_50ms.analyze.HIST_BINS, color='b')
     axs[0].set_title("a) 50 ms")
     axs[0].set_xlabel("ms", fontsize=8)
+    axs[0].set_ylabel("frequency", fontsize=8)
+
 
     # 100ms
     y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_20["msgs"]), float)
@@ -246,11 +277,11 @@ def plot():
     # plot deltas of 2 bit encoding
     plt.plot(list(ele["lora_msg_id"] for ele in mea_24["msgs"])[900:1100], list(ele["gw_timestamp_delta"] for ele in mea_24["msgs"])[900:1100], "b.-")
     plt.xlabel('msg')
-    plt.ylabel('gateway delta timestamp [s]')
+    plt.ylabel('IPD at gateway [s]')
     plt.tick_params('y')
     plt.grid(True)
     plt.savefig("delta_2bit.svg")
-    plt.show()
+#    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
@@ -269,6 +300,7 @@ def plot():
     y2 = ((y2) - mea_24_xor_2bit.analyze.NOMINAL_S) * 1000
     ax1.hist(y2, bins=mea_24_xor_2bit.analyze.HIST_BINS, color='b')
     ax1.set_title("a) 2 bit")
+    ax1.set_ylabel("frequency")
 
     # 4bit
     y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_25["msgs"]), float)
@@ -276,7 +308,7 @@ def plot():
     ax2.hist(y2, bins=mea_25_xor_4bit.analyze.HIST_BINS, color='b')
     ax2.set_title("b) 4 bit")
 
-    # 4bit
+    # 8bit
     y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_22["msgs"]), float)
     y2 = ((y2) - mea_22_xor_8bit.analyze.NOMINAL_S) * 1000
     ax3.hist(y2, bins=mea_22_xor_8bit.analyze.HIST_BINS, color='b')
@@ -285,6 +317,19 @@ def plot():
 
     plt.savefig("hist_nbit.svg")
 #    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+
+    # 4bit with lfsr
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_27["msgs"]), float)
+    y2 = ((y2) - mea_27_xor_4bit_lfsr_fix.analyze.NOMINAL_S) * 1000
+    plt.hist(y2, bins=mea_27_xor_4bit_lfsr_fix.analyze.HIST_BINS, color='b')
+    plt.xlabel("ms")
+    plt.ylabel("frequency")
+    plt.savefig("hist_4bit_lfsr.svg")
+    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
