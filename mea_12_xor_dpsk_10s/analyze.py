@@ -39,6 +39,16 @@ def plot():
     numPhasesDecoded = res["numPhasesDecoded"]
     numPhasesErrors = res["numPhasesErrors"]
 
+    # Check if messages are ordered correctly
+    msg_id_head = 0
+    for msg in msgs:
+        if (msg_id_head+1 < msg["lora_msg_id"]):
+            print("{0} Packet(s) missing at {1}".format(msg["lora_msg_id"] - (msg_id_head+1), msg["lora_msg_id"]))
+        elif (msg_id_head+1 > msg["lora_msg_id"]):
+            print("Something is very wrong here! head: {0} id: {1}".format(msg_id_head, msg["lora_msg_id"]))
+
+        msg_id_head = msg["lora_msg_id"]
+
     # Arrange plots
     fig, axs = plt.subplots(SUBPLOT_SIZE[0],SUBPLOT_SIZE[1])
     fig.suptitle(SUPTITLE)
@@ -167,7 +177,7 @@ def plot():
 
     y1 = np.array(y1)
 
-    print("Packetloss: \n\t{0} (of {1} = {2:.2f}%)".format(numMsgsLost, len(msgs), (numMsgsLost/len(msgs))*100))
+    print("Packetloss: \n\t{0} (of {1} sent) = {2:.2f}%".format(numMsgsLost, msgs[-1]["lora_msg_id"], (numMsgsLost/msgs[-1]["lora_msg_id"])*100))
 
     print("Jitter:")
     print("\tmin:  {0:.2f} ms".format(np.min(y1)))
