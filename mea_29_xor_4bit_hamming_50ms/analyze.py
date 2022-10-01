@@ -31,7 +31,7 @@ def readMeasurements(f=FILE):
     return data
 
 def analyze(measurements):
-    return helper.readMessages_nBit(measurements, NOMINAL_S, TOLERANCE_S, PHASE_DELTA_S, BITS, PRINT_MATCHES, watermarkShift=WATERMARK_SHIFT)
+    return helper.readMessages_nBit_ecc(measurements, NOMINAL_S, TOLERANCE_S, PHASE_DELTA_S, BITS, PRINT_MATCHES, watermarkShift=WATERMARK_SHIFT)
 
 def plot():
 
@@ -41,6 +41,7 @@ def plot():
     numMsgsLost = res["numMsgsLost"]
     numPhasesDecoded = res["numPhasesDecoded"]
     numPhasesErrors = res["numPhasesErrors"]
+    ecc = res["ecc"]
 
     # Arrange plots
     fig, axs = plt.subplots(SUBPLOT_SIZE[0],SUBPLOT_SIZE[1])
@@ -144,6 +145,11 @@ def plot():
     print("\tDecoded: {0}".format(numPhasesDecoded))
     print("\tCorrect: {0}\t({1:.2f}%)".format(numPhasesDecoded-numPhasesErrors, ((numPhasesDecoded-numPhasesErrors) / numPhasesDecoded)*100))
     print("\tErrors:  {0}\t({1:.2f}%)".format(numPhasesErrors, (numPhasesErrors / numPhasesDecoded)*100))
+
+    print("ECC:")
+    print("\tnoErr: {0}".format(ecc["noErr"]))
+    print("\tsingleBit: {0}".format(ecc["singleBit"]))
+    print("\tdualBit: {0}".format(ecc["dualBit"]))
 
     print("Duration: {0}h".format((msgs[-1]["gw_timestamp"] - msgs[0]["gw_timestamp"])/(60*60)))
 

@@ -22,6 +22,7 @@ import mea_22_xor_8bit.analyze
 import mea_24_xor_2bit.analyze
 import mea_25_xor_4bit.analyze
 import mea_27_xor_4bit_lfsr_fix.analyze
+import mea_28_xor_4bit_lfsr_ss.analyze
 import analyze
 
 # Ignore NONE in list
@@ -44,6 +45,7 @@ def plot():
     mea_24 = mea_24_xor_2bit.analyze.analyze(mea_24_xor_2bit.analyze.readMeasurements("mea_24_xor_2bit/2bit.json"))
     mea_25 = mea_25_xor_4bit.analyze.analyze(mea_25_xor_4bit.analyze.readMeasurements("mea_25_xor_4bit/4bit.json"))
     mea_27 = mea_27_xor_4bit_lfsr_fix.analyze.analyze(mea_27_xor_4bit_lfsr_fix.analyze.readMeasurements("mea_27_xor_4bit_lfsr_fix/4bit_lfsr.json"))
+    mea_28 = mea_28_xor_4bit_lfsr_ss.analyze.analyze(mea_28_xor_4bit_lfsr_ss.analyze.readMeasurements("mea_28_xor_4bit_lfsr_ss/4bit_ss.json"))
 
     packetloss = analyze.getPacketLosses()
     ber = analyze.getBER()
@@ -329,11 +331,36 @@ def plot():
     plt.xlabel("ms")
     plt.ylabel("frequency")
     plt.savefig("hist_4bit_lfsr.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+
+    # 4bit with lfsr and spreading
+    # Show histogram
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_28["msgs"]), float)
+    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
+    plt.hist(y2, bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS, color='b')
+    plt.xlabel("ms")
+    plt.ylabel("frequency")
+    plt.savefig("hist_4bit_ss.svg")
     plt.show()
     plt.clf()
     plt.cla()
     plt.close()
 
+    # Show despreaded histogram
+    y2 = np.array(list(ele["gw_timestamp_delta_despread"] for ele in mea_28["msgs"]), float)
+    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
+    plt.hist(y2, bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS, color='b')
+    plt.xlabel("ms")
+    plt.ylabel("frequency")
+    plt.savefig("hist_4bit_ss_despread.svg")
+    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
 
 if __name__ == "__main__":
