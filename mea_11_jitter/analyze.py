@@ -92,6 +92,8 @@ def plot():
     y2 = np.array(list(ele["gw_timestamp_delta"] for ele in msgs), float)
     y3 = np.array(list(ele["nw_timestamp_delta"] for ele in msgs), float)
 
+    y2 = y2[2:] # Delete first, this is an outlier
+
     y1 = ((y1) - NOMINAL_S * 1000)
     y2 = ((y2) - NOMINAL_S) * 1000
     y3 = ((y3) - NOMINAL_S) * 1000
@@ -108,12 +110,15 @@ def plot():
     axs[3][0].set_title("Histogram network timestamps")
     axs[3][0].set_xlabel("ms")
 
+    plt.show()
+
     # Show calculations
     y1 = []
     for ele in msgs:
         if not (ele["gw_timestamp_delta"] == None):
             y1.append(ele["gw_timestamp_delta"]*1000)
 
+    y1 = y1[2:] # Delete first, this is an outlier
     y1 = np.array(y1)
 
     print("Packetloss: \n\t{0} (of {1} sent) = {2:.2f}%".format(numMsgsLost, msgs[-1]["lora_msg_id"], (numMsgsLost/msgs[-1]["lora_msg_id"])*100))
@@ -140,7 +145,8 @@ def plot():
     print(f.summary())
     print(f.get_best(method = 'sumsquare_error'))
 
-    plt.show()
+    print("Sorted:")
+    print(np.sort(y1))
 
 def paperPlot():
     res = analyze(readMeasurements())
