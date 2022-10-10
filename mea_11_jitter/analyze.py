@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 import numpy as np
 import copy
+import fitter
 
 sys.path.append('../')
 
@@ -130,6 +131,14 @@ def plot():
     print("\tDuration GW:  {0:.2f} s".format(duration_gw))
     print("\tDuration MCU: {0:.2f} s".format(duration_mcu))
     print("\tDeviation:    {0:.2f} ms ({1:.2f} ppm)".format(deviation*1000, (deviation/duration_gw)*1000000))
+
+    print("Fitter:")
+    #Remove "None" values from y2
+    j = [item for item in y2 if not(np.isnan(item)) == True]
+    f = fitter.Fitter(j, distributions=fitter.get_common_distributions())
+    f.fit()
+    print(f.summary())
+    print(f.get_best(method = 'sumsquare_error'))
 
     plt.show()
 
