@@ -52,7 +52,7 @@ def getPhase_nBits_spreading(deltaTimestamp, nominal, phaseDelta, tolerance, bit
 
     print("deltaTimestamp: {0}, nominal: {1}, phaseDelta: {2}, tolerance: {3}, bits: {4}, delta: {5}, tol: {6}, prevSpreadingDelay: {7}, spreadingDelay: {8}".format(deltaTimestamp, nominal, phaseDelta, tolerance, bits, delta, tol, prevSpreadingDelay, spreadingDelay))
 
-    for i in range(2**bits -1):
+    for i in range(2**bits):
 
         if delta >= -tol and delta <= tol:
             print("delta: {0}, encoded bit is {1}!".format(delta, i))
