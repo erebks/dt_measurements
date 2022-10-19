@@ -99,8 +99,8 @@ def plot():
 
     count, bins, ignored = plt.hist(y2, bins=mea_11_jitter.analyze.HIST_BINS, color='b', density=True)
 
-    mu = np.nanmean(y2)
-    sigma = np.nanstd(y2)
+    mu = -4.4027
+    sigma = 8.58411
     print("mean: {0}".format(mu))
     print("standard dev: {0}".format(sigma))
 
@@ -249,7 +249,7 @@ def plot():
     plt.tick_params('y')
     plt.grid(True)
     plt.savefig("delta_100ms_nojumpback.svg")
-    plt.show()
+#    plt.show()
     plt.clf()
     plt.cla()
     plt.close()
