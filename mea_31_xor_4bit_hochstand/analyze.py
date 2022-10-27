@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 FILE = "hochstand.json"
 PRINT_MATCHES = False
-NOMINAL_S = 70*60
+NOMINAL_S = 70*60 - 0.04
 TOLERANCE_S = 0.025
 PHASE_DELTA_S = 0.050
 BITS = 4
@@ -25,12 +25,12 @@ SUBPLOT_SIZE = [4,3]
 SUPTITLE = "open field SF12"
 
 # MSG 3 (1.318912)
-# ttig
+# ttig (58A0CBFFFE802A21)
 # time:        2022-10-12T12:58:28.363038063Z
 # received at: 2022-10-12T12:58:28.398456977Z
 # timestamp:   4132161076
 
-# kaiserkogel
+# kaiserkogel (AC1F09FFFE004F1F)
 # time:        2022-10-12T12:58:28.359Z
 # gps time:    2022-10-12T12:58:28.359Z
 # received at: 2022-10-12T12:58:28.424225011Z
@@ -54,12 +54,12 @@ def readMeasurements(f=FILE):
     in_file.close()
     return data
 
-def analyze(measurements):
-    return helper.readMessages_nBit(measurements, NOMINAL_S, TOLERANCE_S, PHASE_DELTA_S, BITS, PRINT_MATCHES, watermarkShift=WATERMARK_SHIFT, gw_eui="AC1F09FFFE004F1F" , gw_ts_name="received_at")
+def analyze(measurements, gw_eui="58A0CBFFFE802A21", gw_ts_name="time"):
+    return helper.readMessages_nBit(measurements, NOMINAL_S, TOLERANCE_S, PHASE_DELTA_S, BITS, PRINT_MATCHES, watermarkShift=WATERMARK_SHIFT, gw_eui=gw_eui , gw_ts_name=gw_ts_name)
 
 def plot():
 
-    res = analyze(readMeasurements())
+    res = analyze(readMeasurements(), gw_eui="58A0CBFFFE802A21", gw_ts_name="time")
 
     msgs = res["msgs"]
     numMsgsLost = res["numMsgsLost"]
