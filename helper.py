@@ -279,7 +279,7 @@ def readMessages(data, nominal, tolerance, printMatches):
 
     return {"msgs": msgs, "numMsgsLost": numMsgsLost, "numPhasesDecoded": phases["decoded"], "numPhasesErrors": phases["errors"]}
 
-def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches, watermarkShift=13):
+def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches, watermarkShift=13, gw_eui="58A0CBFFFE802A21", gw_ts_name="time"):
 
     msgs = []
     numMsgsLost = 0
@@ -308,9 +308,14 @@ def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches, 
 
         msg["lora_msg_id"] = element["result"]["uplink_message"]["f_cnt"]
 
+        a = None
+
         for gw in element["result"]["uplink_message"]["rx_metadata"]:
-            if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
-                a = _conv_timestamp(gw["time"])
+            if gw["gateway_ids"]["eui"] == gw_eui:
+                a = _conv_timestamp(gw[gw_ts_name])
+        if a == None:
+            print("Gateway not found!")
+            continue
 
         msg["gw_timestamp_not_compensated"] = a.timestamp()
         msg["gw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
