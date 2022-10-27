@@ -23,6 +23,8 @@ import mea_24_xor_2bit.analyze
 import mea_25_xor_4bit.analyze
 import mea_27_xor_4bit_lfsr_fix.analyze
 import mea_28_xor_4bit_lfsr_ss.analyze
+import mea_30_xor_4bit_feld.analyze
+import mea_31_xor_4bit_hochstand.analyze
 import analyze
 
 # Ignore NONE in list
@@ -46,6 +48,7 @@ def plot():
     mea_25 = mea_25_xor_4bit.analyze.analyze(mea_25_xor_4bit.analyze.readMeasurements("mea_25_xor_4bit/4bit.json"))
     mea_27 = mea_27_xor_4bit_lfsr_fix.analyze.analyze(mea_27_xor_4bit_lfsr_fix.analyze.readMeasurements("mea_27_xor_4bit_lfsr_fix/4bit_lfsr.json"))
     mea_28 = mea_28_xor_4bit_lfsr_ss.analyze.analyze(mea_28_xor_4bit_lfsr_ss.analyze.readMeasurements("mea_28_xor_4bit_lfsr_ss/4bit_ss.json"))
+    mea_30 = mea_30_xor_4bit_feld.analyze.analyze(mea_30_xor_4bit_feld.analyze.readMeasurements("mea_30_xor_4bit_feld/feld.json"))
 
     packetloss = analyze.getPacketLosses()
     ber = analyze.getBER()
@@ -365,6 +368,84 @@ def plot():
     plt.clf()
     plt.cla()
     plt.close()
+
+    # Feld temperature/vdd plot
+    for msg in mea_30["msgs"]:
+        msg["vdd_V"] = ((msg["mcu_timestamp"] >> 16) & 0xffff)/1000
+        msg["temp_C"] = ((msg["mcu_timestamp"] & 0xffff) / 2**6 ) - 273.15
+
+    # temp
+    temp = np.array(list(ele["temp_C"] for ele in mea_30["msgs"]), float)
+    plt.plot(list(ele["lora_msg_id"] for ele in mea_30["msgs"]), temp, color = "b", markevery=50)
+    plt.ylabel("Temperature [°C]")
+    plt.xlabel("msg")
+    plt.tick_params('y', colors='b')
+
+    ax002 = plt.twinx()
+
+    vdd = np.array(list(ele["vdd_V"] for ele in mea_30["msgs"]), float)
+    ax002.plot(list(ele["lora_msg_id"] for ele in mea_30["msgs"]), vdd, color = "r", marker = "v", markevery=50)
+    ax002.set_ylabel('Vdd [V]', color='r')
+    ax002.tick_params('y', colors='r')
+
+    plt.savefig("feld_temp.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # Feld histogram
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_30["msgs"]), float)
+    y2 = ((y2) - mea_30_xor_4bit_feld.analyze.NOMINAL_S) * 1000
+    plt.hist(y2, bins=mea_30_xor_4bit_feld.analyze.HIST_BINS, color='b')
+    plt.xlabel("ms")
+    plt.ylabel("frequency")
+    plt.savefig("feld_hist.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    mea_31 = mea_31_xor_4bit_hochstand.analyze.analyze(mea_31_xor_4bit_hochstand.analyze.readMeasurements("mea_31_xor_4bit_hochstand/hochstand.json"), gw_eui="58A0CBFFFE802A21", gw_ts_name="time")
+
+    # Hochstand temperature/vdd plot
+    for msg in mea_31["msgs"]:
+        msg["vdd_V"] = ((msg["mcu_timestamp"] >> 16) & 0xffff)/1000
+        msg["temp_C"] = ((msg["mcu_timestamp"] & 0xffff) / 2**6 ) - 273.15
+
+    # temp
+    temp = np.array(list(ele["temp_C"] for ele in mea_31["msgs"]), float)
+    plt.plot(list(ele["lora_msg_id"] for ele in mea_31["msgs"]), temp, color = "b", markevery=50)
+    plt.ylabel("Temperature [°C]")
+    plt.xlabel("msg")
+    plt.tick_params('y', colors='b')
+
+    ax002 = plt.twinx()
+
+    vdd = np.array(list(ele["vdd_V"] for ele in mea_31["msgs"]), float)
+    ax002.plot(list(ele["lora_msg_id"] for ele in mea_31["msgs"]), vdd, color = "r", marker = "v", markevery=5)
+    ax002.set_ylabel('Vdd [V]', color='r')
+    ax002.tick_params('y', colors='r')
+
+    plt.savefig("hochstand_temp.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+    # Feld histogram
+    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_31["msgs"]), float)
+    y2 = ((y2) - mea_31_xor_4bit_hochstand.analyze.NOMINAL_S) * 1000
+    plt.hist(y2, bins=mea_31_xor_4bit_hochstand.analyze.HIST_BINS, color='b')
+    plt.xlabel("ms")
+    plt.ylabel("frequency")
+    plt.savefig("hochstand_hist.svg")
+#    plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+#    mea_31 = mea_31_xor_4bit_hochstand.analyze.analyze(mea_31_xor_4bit_hochstand.analyze.readMeasurements("mea_31_xor_4bit_hochstand/hochstand.json"), gw_eui="58A0CBFFFE802A21", gw_ts_name="time")
 
 
 if __name__ == "__main__":
