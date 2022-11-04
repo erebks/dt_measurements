@@ -279,6 +279,157 @@ def readMessages(data, nominal, tolerance, printMatches):
 
     return {"msgs": msgs, "numMsgsLost": numMsgsLost, "numPhasesDecoded": phases["decoded"], "numPhasesErrors": phases["errors"]}
 
+def readMessages_ustimestamp(data, nominal, tolerance, printMatches):
+
+    msgs = []
+    numMsgsLost = 0
+    phases = {
+        "decoded": 0,
+        "errors": 0
+        }
+
+    # Go through messages and extract info
+    for element in data:
+        msg = {
+            "previous_lost": False,
+            "lora_msg_id": None,
+            "gw_timestamp": None,
+            "gw_timestamp_delta": None,
+            "nw_timestamp": None,
+            "nw_timestamp_delta": None,
+            "mcu_timestamp": None,
+            "mcu_timestamp_s": None,
+            "mcu_timestamp_delta": None,
+            "mcu_timestamp_delta_s": None,
+            "calculation": {"watermark": None, "phase": None},
+            "extraction": {"phase": None},
+            "phase_correct": None,
+        }
+
+        msg["lora_msg_id"] = element["result"]["uplink_message"]["f_cnt"]
+
+#        for gw in element["result"]["uplink_message"]["rx_metadata"]:
+#            if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
+#                a = _conv_timestamp(gw["time"])
+
+#        msg["gw_timestamp_not_compensated"] = a.timestamp()
+#        msg["gw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
+
+#        a = _conv_timestamp(element["result"]["received_at"])
+#        msg["nw_timestamp_not_compensated"] = a.timestamp()
+#        msg["nw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
+
+        for gw in element["result"]["uplink_message"]["rx_metadata"]:
+            if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
+                a_us = int(gw["timestamp"])
+
+        msg["gw_timestamp_not_compensated"] = a_us / (1000 * 1000)
+        msg["gw_timestamp"] = a_us / (1000 * 1000) - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
+
+        a = _conv_timestamp(element["result"]["received_at"])
+        msg["nw_timestamp_not_compensated"] = a.timestamp()
+        msg["nw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
+
+        a = element["result"]["uplink_message"]["frm_payload"]
+        a = int(base64.b64decode(a).hex(),16) # Convert base64 to hexstring
+        a = int(struct.pack("<Q", a).hex(), 16) # Convert to little endian
+        msg["mcu_timestamp"] = int( a / 2**32)  # Pad to 32 bit and use [ms]
+        msg["mcu_timestamp_s"] = msg["mcu_timestamp"] / 1000
+
+        # Get previous message if possible
+        if not len(msgs) == 0:
+            preMsg = msgs[-1]
+            # Check if a frame was lost
+            if (not ((msg["lora_msg_id"] - preMsg["lora_msg_id"]) == 1) ):
+                print("ID: {0}".format(msg["lora_msg_id"]))
+                print("\t{0} frame(s) after ID {1} lost".format((msg["lora_msg_id"] - preMsg["lora_msg_id"])-1, preMsg["lora_msg_id"]))
+                print("\tGW  TS: {0:.3f} s".format(msg["gw_timestamp"]))
+                print("\tMCU TS: {0:.3f} s".format(msg["mcu_timestamp"]/1000))
+                msg["previous_lost"] = True
+                numMsgsLost += (msg["lora_msg_id"] - preMsg["lora_msg_id"])-1
+
+            elif (preMsg["previous_lost"] == True):
+                # Calc time deltas
+                msg["gw_timestamp_delta"] = msg["gw_timestamp"] - preMsg["gw_timestamp"]
+#                if   (msg["gw_timestamp_delta"] < 0 and msg["gw_timestamp_delta"] > -600):
+#                    msg["gw_timestamp_delta"] += 500.65408
+#                elif (msg["gw_timestamp_delta"] < -600):
+#                    msg["gw_timestamp_delta"] += (2**32) / (1000 * 1000)
+                if (msg["gw_timestamp_delta"] < -501):
+                    msg["gw_timestamp_delta"] += ((2**32)-1) / (1000 * 1000)
+
+                elif (msg["gw_timestamp_delta"] < 0 and msg["gw_timestamp_delta"] > -501):
+                    msg["gw_timestamp_delta"] += (((24*60*60*1000*1000)%((2**32)-1)) - ((20*((2**32)-1)))) / (1000*1000)
+
+                msg["nw_timestamp_delta"] = msg["nw_timestamp"] - preMsg["nw_timestamp"]
+                msg["mcu_timestamp_delta"] = msg["mcu_timestamp"] - preMsg["mcu_timestamp"]
+                msg["mcu_timestamp_delta_s"] = msg["mcu_timestamp_delta"] / 1000
+
+                # Calc watermark
+                msg["calculation"]["watermark"] = calcWatermark(preMsg["mcu_timestamp"], msg["mcu_timestamp"])
+
+                # Get extracted phase
+                msg["extraction"]["phase"] = getPhase(msg["gw_timestamp_delta"], nominal, tolerance)
+
+                print("ID: {0}".format(msg["lora_msg_id"]))
+                print("\tGW  TS: {0:.3f} s (pre: {1:.3f} s), delta: {2:.3f} ms".format(msg["gw_timestamp"], preMsg["gw_timestamp"], msg["gw_timestamp_delta"]*1000))
+                print("\tMCU TS: {0:.3f} s (pre: {1:.3f} s), delta: {2:.3f} ms".format(msg["mcu_timestamp"]/1000, preMsg["mcu_timestamp"]/1000, msg["mcu_timestamp_delta"]))
+                print("\tCalculated Watermark: 0x{0:x}, Phase: {1}".format(msg["calculation"]["watermark"], msg["calculation"]["phase"]))
+                print("\tExtracted Phase: {0}".format(msg["extraction"]["phase"]))
+                print("\tPrevious Lost, cannot verify phase")
+            else:
+                # Calc time deltas
+                msg["gw_timestamp_delta"] = msg["gw_timestamp"] - preMsg["gw_timestamp"]
+                if (msg["gw_timestamp_delta"] < -501):
+                    msg["gw_timestamp_delta"] += ((2**32)-1) / (1000 * 1000)
+
+                elif (msg["gw_timestamp_delta"] < 0 and msg["gw_timestamp_delta"] > -501):
+                    msg["gw_timestamp_delta"] += (((24*60*60*1000*1000)) - ((20*((2**32)-1)))) / (1000*1000)
+
+                msg["nw_timestamp_delta"] = msg["nw_timestamp"] - preMsg["nw_timestamp"]
+                msg["mcu_timestamp_delta"] = msg["mcu_timestamp"] - preMsg["mcu_timestamp"]
+                msg["mcu_timestamp_delta_s"] = msg["mcu_timestamp_delta"] / 1000
+
+                # Calc watermark and phase
+                msg["calculation"]["watermark"] = calcWatermark(preMsg["mcu_timestamp"], msg["mcu_timestamp"])
+                msg["calculation"]["phase"] = calcPhase(preMsg["extraction"]["phase"], msg["calculation"]["watermark"])
+                msg["extraction"]["phase"] = getPhase(msg["gw_timestamp_delta"], nominal, tolerance)
+
+                phases["decoded"] += 1
+
+                if not (msg["calculation"]["phase"] == msg["extraction"]["phase"]):
+                    msg["phase_correct"] = False
+                    phases["errors"] += 1
+                    print("ID: {0}".format(msg["lora_msg_id"]))
+                    print("\tGW  TS: {0:.3f} s (pre: {1:.3f} s), delta: {2:.3f} ms".format(msg["gw_timestamp"], preMsg["gw_timestamp"], msg["gw_timestamp_delta"]*1000))
+                    print("\tMCU TS: {0:.3f} s (pre: {1:.3f} s), delta: {2:.3f} ms".format(msg["mcu_timestamp"]/1000, preMsg["mcu_timestamp"]/1000, msg["mcu_timestamp_delta"]))
+                    print("\tCalculated Watermark: 0x{0:x}, Phase: {1}".format(msg["calculation"]["watermark"], msg["calculation"]["phase"]))
+                    print("\tExtracted Phase: {0}".format(msg["extraction"]["phase"]))
+                    print("\tCalculated and Extracted phases do not match")
+                else:
+                    msg["phase_correct"] = True
+                    if (printMatches == True):
+                        print("ID: {0}".format(msg["lora_msg_id"]))
+                        print("\tGW  TS: {0:.3f} s (pre: {1:.3f} s), delta: {2:.3f} ms".format(msg["gw_timestamp"], preMsg["gw_timestamp"], msg["gw_timestamp_delta"]*1000))
+                        print("\tMCU TS: {0:.3f} s (pre: {1:.3f} s), delta: {2:.3f} ms".format(msg["mcu_timestamp"]/1000, preMsg["mcu_timestamp"]/1000, msg["mcu_timestamp_delta"]))
+                        print("\tCalculated Watermark: 0x{0:x}, Phase: {1}".format(msg["calculation"]["watermark"], msg["calculation"]["phase"]))
+                        print("\tExtracted Phase: {0}".format(msg["extraction"]["phase"]))
+                        print("\tCalculated and Extracted phases match")
+
+        else:
+            # First message
+            msg["calculation"]["phase"] = 0
+            msg["extraction"]["phase"] = 0
+            print("ID: {0}".format(msg["lora_msg_id"]))
+            print("\tFirst message")
+            print("\tGW  TS: {0:.3f} s".format(msg["gw_timestamp"]))
+            print("\tMCU TS: {0:.3f} s".format(msg["mcu_timestamp"]/1000))
+
+        msgs.append(msg)
+
+    return {"msgs": msgs, "numMsgsLost": numMsgsLost, "numPhasesDecoded": phases["decoded"], "numPhasesErrors": phases["errors"]}
+
+
 def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches, watermarkShift=13, gw_eui="58A0CBFFFE802A21", gw_ts_name="time"):
 
     msgs = []
