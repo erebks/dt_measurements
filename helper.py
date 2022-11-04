@@ -455,6 +455,8 @@ def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches, 
             "calculation": {"watermark": None, "phase": None},
             "extraction": {"phase": None},
             "phase_correct": None,
+            "snr": None,
+            "rssi": None,
         }
 
         msg["lora_msg_id"] = element["result"]["uplink_message"]["f_cnt"]
@@ -464,6 +466,13 @@ def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches, 
         for gw in element["result"]["uplink_message"]["rx_metadata"]:
             if gw["gateway_ids"]["eui"] == gw_eui:
                 a = _conv_timestamp(gw[gw_ts_name])
+                try:
+                    msg["rssi"] = float(gw["rssi"])
+                    msg["snr"] = float(gw["snr"])
+                except:
+                    print("HELP!!!")
+                    print(gw)
+                    pass
         if a == None:
             print("Gateway not found!")
             continue
