@@ -148,6 +148,28 @@ def plot():
     print("Sorted:")
     print(np.sort(y1))
 
+
+    # Read SNR/RSSI
+    snr = []
+    rssi = []
+
+    for ele in msgs:
+        if ele["snr"] != None:
+            snr.append(ele["snr"])
+        if ele["rssi"] != None:
+            rssi.append(ele["rssi"])
+
+    print("SNR:")
+    print("\tmin: {0} dB".format(np.min(snr)))
+    print("\tmax: {0} dB".format(np.max(snr)))
+    print("\tavg: {0} dB".format(np.average(snr)))
+
+    print("RSSI:")
+    print("\tmin: {0} dBm".format(np.min(rssi)))
+    print("\tmax: {0} dBm".format(np.max(rssi)))
+    print("\tavg: {0} dBm".format(np.average(rssi)))
+
+
 def paperPlot():
     res = analyze(readMeasurements())
 

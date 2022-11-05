@@ -180,6 +180,13 @@ def plot():
     axs[3][1].set_title("Histogram NW timestamps (@ 0ms)")
     axs[3][1].set_xlabel("ms")
 
+    msg_received = np.zeros((1, msg_id_head+1), bool)
+
+    for msg in msgs:
+        msg_received[0, int(msg["lora_msg_id"])] = True
+
+    axs[3][2].imshow(msg_received, aspect='auto')
+
     # Show calculations
     y1 = []
     for ele in msgs:

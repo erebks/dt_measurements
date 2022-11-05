@@ -181,6 +181,8 @@ def readMessages(data, nominal, tolerance, printMatches):
             "calculation": {"watermark": None, "phase": None},
             "extraction": {"phase": None},
             "phase_correct": None,
+            "snr": None,
+            "rssi": None,
         }
 
         msg["lora_msg_id"] = element["result"]["uplink_message"]["f_cnt"]
@@ -188,6 +190,11 @@ def readMessages(data, nominal, tolerance, printMatches):
         for gw in element["result"]["uplink_message"]["rx_metadata"]:
             if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
                 a = _conv_timestamp(gw["time"])
+                try:
+                    msg["rssi"] = float(gw["rssi"])
+                    msg["snr"] = float(gw["snr"])
+                except:
+                    pass
 
         msg["gw_timestamp_not_compensated"] = a.timestamp()
         msg["gw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
@@ -304,6 +311,8 @@ def readMessages_ustimestamp(data, nominal, tolerance, printMatches):
             "calculation": {"watermark": None, "phase": None},
             "extraction": {"phase": None},
             "phase_correct": None,
+            "snr": None,
+            "rssi": None,
         }
 
         msg["lora_msg_id"] = element["result"]["uplink_message"]["f_cnt"]
@@ -322,6 +331,11 @@ def readMessages_ustimestamp(data, nominal, tolerance, printMatches):
         for gw in element["result"]["uplink_message"]["rx_metadata"]:
             if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
                 a_us = int(gw["timestamp"])
+                try:
+                    msg["rssi"] = float(gw["rssi"])
+                    msg["snr"] = float(gw["snr"])
+                except:
+                    pass
 
         msg["gw_timestamp_not_compensated"] = a_us / (1000 * 1000)
         msg["gw_timestamp"] = a_us / (1000 * 1000) - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
@@ -470,8 +484,6 @@ def readMessages_nBit(data, nominal, tolerance, phaseDelta, bits, printMatches, 
                     msg["rssi"] = float(gw["rssi"])
                     msg["snr"] = float(gw["snr"])
                 except:
-                    print("HELP!!!")
-                    print(gw)
                     pass
         if a == None:
             print("Gateway not found!")
@@ -605,6 +617,8 @@ def readMessages_nBit_ss(data, nominal, tolerance, phaseDelta, bits, printMatche
             "calculation": {"watermark": None, "phase": None},
             "extraction": {"phase": None},
             "phase_correct": None,
+            "snr": None,
+            "rssi": None,
         }
 
         msg["lora_msg_id"] = element["result"]["uplink_message"]["f_cnt"]
@@ -621,6 +635,11 @@ def readMessages_nBit_ss(data, nominal, tolerance, phaseDelta, bits, printMatche
         for gw in element["result"]["uplink_message"]["rx_metadata"]:
             if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
                 a = _conv_timestamp(gw["time"])
+                try:
+                    msg["rssi"] = float(gw["rssi"])
+                    msg["snr"] = float(gw["snr"])
+                except:
+                    pass
 
         msg["gw_timestamp_not_compensated"] = a.timestamp()
         msg["gw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])
@@ -747,6 +766,8 @@ def readMessages_nBit_ecc(data, nominal, tolerance, phaseDelta, bits, printMatch
             "calculation": {"watermark": None, "phase": None},
             "extraction": {"bit_errors": None, "phase": None},
             "phase_correct": None,
+            "snr": None,
+            "rssi": None,
         }
 
         msg["lora_msg_id"] = element["result"]["uplink_message"]["f_cnt"]
@@ -754,6 +775,11 @@ def readMessages_nBit_ecc(data, nominal, tolerance, phaseDelta, bits, printMatch
         for gw in element["result"]["uplink_message"]["rx_metadata"]:
             if gw["gateway_ids"]["eui"] == "58A0CBFFFE802A21":
                 a = _conv_timestamp(gw["time"])
+                try:
+                    msg["rssi"] = float(gw["rssi"])
+                    msg["snr"] = float(gw["snr"])
+                except:
+                    pass
 
         msg["gw_timestamp_not_compensated"] = a.timestamp()
         msg["gw_timestamp"] = a.timestamp() - float(element["result"]["uplink_message"]["consumed_airtime"][:-1])

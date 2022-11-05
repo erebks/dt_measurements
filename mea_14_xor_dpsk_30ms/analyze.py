@@ -155,6 +155,26 @@ def plot():
 
     print("Duration: {0}h".format((msgs[-1]["gw_timestamp"] - msgs[0]["gw_timestamp"])/(60*60)))
 
+    # Read SNR/RSSI
+    snr = []
+    rssi = []
+
+    for ele in msgs:
+        if ele["snr"] != None:
+            snr.append(ele["snr"])
+        if ele["rssi"] != None:
+            rssi.append(ele["rssi"])
+
+    print("SNR:")
+    print("\tmin: {0} dB".format(np.min(snr)))
+    print("\tmax: {0} dB".format(np.max(snr)))
+    print("\tavg: {0} dB".format(np.average(snr)))
+
+    print("RSSI:")
+    print("\tmin: {0} dBm".format(np.min(rssi)))
+    print("\tmax: {0} dBm".format(np.max(rssi)))
+    print("\tavg: {0} dBm".format(np.average(rssi)))
+
     plt.show()
 
 def paperPlot():
