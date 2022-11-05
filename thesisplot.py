@@ -1,9 +1,18 @@
 import json
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+from matplotlib import colors
 import sys
 import numpy as np
 import copy
+
+# Setup standard size
+WIDTH_cm = 21 - 5 - 2   # A4 = 21cm, with -5cm margins from tex -2 cm for text
+HEIGHT_cm = WIDTH_cm/1.5  # 1:1.5 aspect
+
+# Matplotlib does only know inches...
+WIDTH = WIDTH_cm * 1/2.54
+HEIGHT = HEIGHT_cm * 1/2.54
 
 #import helper
 
@@ -30,6 +39,81 @@ import analyze
 # Ignore NONE in list
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+def plot_single_hist(data, bins, filename, color='b', xlabel='ms', ylabel='frequency', show=False):
+    fig, ax = plt.subplots(figsize=(WIDTH, HEIGHT))
+    ax.hist(data, bins=bins, color=color)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+    plt.savefig(filename)
+    if show:
+        plt.show()
+
+    # Reset plt
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+def plot_single_ipd(data, filename, color='b.-', xlabel='msg', ylabel='IPD at gateway [s]', show=False):
+    fig, ax = plt.subplots(figsize=(WIDTH, HEIGHT))
+    ax.plot(data, color)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.tick_params('y')
+    ax.grid(True)
+
+    plt.savefig(filename)
+    if show:
+        plt.show()
+
+    # Reset plt
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+def plot_temp_vdd(msgs, temp, vdd, msgs_received, filename, xlabel='msg', legend_loc='best', show=False):
+    fig, (ax0, ax1) = plt.subplots(2, 1, sharex=True, figsize=(WIDTH, HEIGHT), gridspec_kw=dict(height_ratios=[15, 1]))
+
+    # temp
+    line_temp = ax0.plot(msgs, temp, color = "b", label='Temperature')
+    ax0.set_ylabel("[°C]")
+    ax0.tick_params('y', colors='b')
+
+    ax002 = ax0.twinx()
+
+    line_vdd = ax002.plot(msgs, vdd, color = "r", marker = "v", markevery=0.2, label='Vdd')
+    ax002.set_ylabel('[V]')
+    ax002.tick_params('y', colors='r')
+
+    handles0, labels0 = ax0.get_legend_handles_labels()
+    handles002, labels002 = ax002.get_legend_handles_labels()
+
+    ax0.legend(handles=handles0 + handles002, labels=labels0 + labels002, loc=legend_loc)
+
+    plt.setp(ax0.get_xticklabels(), visible=False)
+    plt.setp(ax1.get_yticklabels(), visible=False)
+    yticks = ax1.yaxis.get_major_ticks()
+    yticks[-1].label1.set_visible(False)
+
+    cmap = colors.ListedColormap(['darkgray', 'palegreen'])
+    bounds=[0,0.5,1]
+    norm = colors.BoundaryNorm(bounds, cmap.N)
+
+    ax1.imshow(msgs_received, aspect='auto', cmap=cmap, norm=norm)
+    ax1.set_xlabel(xlabel)
+
+    plt.subplots_adjust(hspace=.0)
+
+    plt.savefig(filename)
+    if show:
+        plt.show()
+
+    # Reset plt
+    plt.clf()
+    plt.cla()
+    plt.close()
+
 
 def plot():
     mea_11 = mea_11_jitter.analyze.analyze(mea_11_jitter.analyze.readMeasurements("mea_11_jitter/out.json"))
@@ -374,37 +458,24 @@ def plot():
         msg["vdd_V"] = ((msg["mcu_timestamp"] >> 16) & 0xffff)/1000
         msg["temp_C"] = ((msg["mcu_timestamp"] & 0xffff) / 2**6 ) - 273.15
 
-    # temp
-    temp = np.array(list(ele["temp_C"] for ele in mea_30["msgs"]), float)
-    plt.plot(list(ele["lora_msg_id"] for ele in mea_30["msgs"]), temp, color = "b", markevery=50)
-    plt.ylabel("Temperature [°C]")
-    plt.xlabel("msg")
-    plt.tick_params('y', colors='b')
+    max_msgs = int(mea_30["msgs"][-1]["lora_msg_id"])
+    msg_received = np.zeros((1, max_msgs+1), bool)
 
-    ax002 = plt.twinx()
+    for msg in mea_30["msgs"]:
+        msg_received[0, int(msg["lora_msg_id"])] = True
 
-    vdd = np.array(list(ele["vdd_V"] for ele in mea_30["msgs"]), float)
-    ax002.plot(list(ele["lora_msg_id"] for ele in mea_30["msgs"]), vdd, color = "r", marker = "v", markevery=50)
-    ax002.set_ylabel('Vdd [V]', color='r')
-    ax002.tick_params('y', colors='r')
-
-    plt.savefig("feld_temp.svg")
-#    plt.show()
-    plt.clf()
-    plt.cla()
-    plt.close()
+    plot_temp_vdd(list(ele["lora_msg_id"] for ele in mea_30["msgs"]),
+                  np.array(list(ele["temp_C"] for ele in mea_30["msgs"]), float),
+                  np.array(list(ele["vdd_V"] for ele in mea_30["msgs"]), float),
+                  msg_received,
+                  filename = "feld_temp.svg",
+                  legend_loc='lower left',
+                  show = False)
 
     # Feld histogram
     y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_30["msgs"]), float)
     y2 = ((y2) - mea_30_xor_4bit_feld.analyze.NOMINAL_S) * 1000
-    plt.hist(y2, bins=mea_30_xor_4bit_feld.analyze.HIST_BINS, color='b')
-    plt.xlabel("ms")
-    plt.ylabel("frequency")
-    plt.savefig("feld_hist.svg")
-#    plt.show()
-    plt.clf()
-    plt.cla()
-    plt.close()
+    plot_single_hist(data=y2, bins=mea_30_xor_4bit_feld.analyze.HIST_BINS, filename="feld_hist.svg")
 
     mea_31 = mea_31_xor_4bit_hochstand.analyze.analyze(mea_31_xor_4bit_hochstand.analyze.readMeasurements("mea_31_xor_4bit_hochstand/hochstand.json"), gw_eui="58A0CBFFFE802A21", gw_ts_name="time")
 
@@ -413,37 +484,24 @@ def plot():
         msg["vdd_V"] = ((msg["mcu_timestamp"] >> 16) & 0xffff)/1000
         msg["temp_C"] = ((msg["mcu_timestamp"] & 0xffff) / 2**6 ) - 273.15
 
-    # temp
-    temp = np.array(list(ele["temp_C"] for ele in mea_31["msgs"]), float)
-    plt.plot(list(ele["lora_msg_id"] for ele in mea_31["msgs"]), temp, color = "b", markevery=50)
-    plt.ylabel("Temperature [°C]")
-    plt.xlabel("msg")
-    plt.tick_params('y', colors='b')
+    max_msgs = int(mea_31["msgs"][-1]["lora_msg_id"])
+    msg_received = np.zeros((1, max_msgs+1), bool)
 
-    ax002 = plt.twinx()
+    for msg in mea_31["msgs"]:
+        msg_received[0, int(msg["lora_msg_id"])] = True
 
-    vdd = np.array(list(ele["vdd_V"] for ele in mea_31["msgs"]), float)
-    ax002.plot(list(ele["lora_msg_id"] for ele in mea_31["msgs"]), vdd, color = "r", marker = "v", markevery=5)
-    ax002.set_ylabel('Vdd [V]', color='r')
-    ax002.tick_params('y', colors='r')
+    plot_temp_vdd(list(ele["lora_msg_id"] for ele in mea_31["msgs"]),
+                  np.array(list(ele["temp_C"] for ele in mea_31["msgs"]), float),
+                  np.array(list(ele["vdd_V"] for ele in mea_31["msgs"]), float),
+                  msg_received,
+                  filename = "hochstand_temp.svg",
+                  legend_loc='lower left',
+                  show = False)
 
-    plt.savefig("hochstand_temp.svg")
-#    plt.show()
-    plt.clf()
-    plt.cla()
-    plt.close()
-
-    # Feld histogram
+    # Hochstand histogram
     y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_31["msgs"]), float)
     y2 = ((y2) - mea_31_xor_4bit_hochstand.analyze.NOMINAL_S) * 1000
-    plt.hist(y2, bins=mea_31_xor_4bit_hochstand.analyze.HIST_BINS, color='b')
-    plt.xlabel("ms")
-    plt.ylabel("frequency")
-    plt.savefig("hochstand_hist.svg")
-#    plt.show()
-    plt.clf()
-    plt.cla()
-    plt.close()
+    plot_single_hist(data=y2, bins=mea_31_xor_4bit_hochstand.analyze.HIST_BINS, filename="hochstand_hist.svg")
 
 #    mea_31 = mea_31_xor_4bit_hochstand.analyze.analyze(mea_31_xor_4bit_hochstand.analyze.readMeasurements("mea_31_xor_4bit_hochstand/hochstand.json"), gw_eui="58A0CBFFFE802A21", gw_ts_name="time")
 
