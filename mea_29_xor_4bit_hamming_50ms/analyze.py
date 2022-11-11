@@ -43,6 +43,16 @@ def plot():
     numPhasesErrors = res["numPhasesErrors"]
     ecc = res["ecc"]
 
+    # Check if messages are ordered correctly
+    msg_id_head = 0
+    for msg in msgs:
+        if (msg_id_head+1 < msg["lora_msg_id"]):
+            print("{0} Packet(s) missing at {1}".format(msg["lora_msg_id"] - (msg_id_head+1), msg["lora_msg_id"]))
+        elif (msg_id_head+1 > msg["lora_msg_id"]):
+            print("Something is very wrong here! head: {0} id: {1}".format(msg_id_head, msg["lora_msg_id"]))
+
+        msg_id_head = msg["lora_msg_id"]
+
     # Arrange plots
     fig, axs = plt.subplots(SUBPLOT_SIZE[0],SUBPLOT_SIZE[1])
     fig.suptitle(SUPTITLE)
