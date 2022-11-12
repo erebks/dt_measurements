@@ -29,7 +29,6 @@ def readMeasurements(f=FILE):
     return data
 
 def analyze(measurements):
-    #numMsgsLost, msgs = helper.readMessages(measurements, NOMINAL_S, TOLERANCE_S, PRINT_MATCHES)
     return helper.readMessages(measurements, NOMINAL_S, TOLERANCE_S, 1, 1, PRINT_MATCHES, gw_ts_name="gwTs")
 
 def plot():
@@ -130,22 +129,7 @@ def plot():
 
     plt.show()
 
-    # Show calculations
-    y1 = []
-    for ele in msgs:
-        if not (ele["gwTs"]["delta"] == None):
-            y1.append(ele["gwTs"]["delta"]*1000)
-
-    y1 = y1[2:] # Delete first, this is an outlier
-    y1 = np.array(y1)
-
-    print("Packetloss: \n\t{0} (of {1} sent) = {2:.2f}%".format(res["numMsgsLost"], msgs[-1]["loraMsgId"]+1, (res["numMsgsLost"]/msgs[-1]["loraMsgId"]+1)*100))
-
-    print("Jitter:")
-    print("\tmin:  {0:.2f} ms".format(np.min(y1)))
-    print("\tmax:  {0:.2f} ms".format(np.max(y1)))
-    print("\tavg:  {0:.2f} ms".format(np.average(y1)))
-    print("\tmean: {0:.2f} ms".format(np.mean(y1)))
+    helper.printCalculations(res)
 
     duration_gw = msgs[-1]["gwTs"]["seconds"] - msgs[0]["gwTs"]["seconds"]
     duration_mcu = msgs[-1]["payload"]["seconds"] - msgs[0]["payload"]["seconds"]
@@ -165,64 +149,6 @@ def plot():
 
     print("Sorted:")
     print(np.sort(y1))
-
-
-    # Read SNR/RSSI
-    snr = []
-    rssi = []
-
-    for ele in msgs:
-        if ele["snr"] != None:
-            snr.append(ele["snr"])
-        if ele["rssi"] != None:
-            rssi.append(ele["rssi"])
-
-    print("SNR:")
-    print("\tmin: {0} dB".format(np.min(snr)))
-    print("\tmax: {0} dB".format(np.max(snr)))
-    print("\tavg: {0} dB".format(np.average(snr)))
-
-    print("RSSI:")
-    print("\tmin: {0} dBm".format(np.min(rssi)))
-    print("\tmax: {0} dBm".format(np.max(rssi)))
-    print("\tavg: {0} dBm".format(np.average(rssi)))
-
-
-def paperPlot():
-    res = analyze(readMeasurements())
-
-    msgs = res["msgs"]
-    numMsgsLost = res["numMsgsLost"]
-    numPhasesDecoded = res["numPhasesDecoded"]
-    numPhasesErrors = res["numPhasesErrors"]
-
-    # Print x-y diagram of delta timestamps
-
-    # Extract only msg id 500 to 700
-    a = []
-    for ele in msgs:
-        if ele["lora_msg_id"] >= 500 and ele["lora_msg_id"] <= 700:
-            a.append(ele)
-
-    plt.plot(list(ele["lora_msg_id"] for ele in a), list(ele["gw_timestamp_delta"] for ele in a), "b.-")
-    plt.title("Jitter: Delta timestamps (Zoom)")
-    plt.xlabel('msg')
-    plt.ylabel('gateway delta timestamp [s]')
-    plt.tick_params('y')
-    plt.grid(True)
-
-    plt.show()
-
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in msgs), float)
-    y2 = ((y2) - NOMINAL_S) * 1000
-
-    plt.hist(y2, bins=HIST_BINS, color='b')
-    plt.title("Jitter: Histogram of gateway timestamps")
-    plt.xlabel("ms")
-    plt.grid(True)
-
-    plt.show()
-
 
 if __name__ == "__main__":
     plot()

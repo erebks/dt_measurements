@@ -87,14 +87,14 @@ def getBER():
             "10s",
         ],
         [
-            (mea_13["numPhasesErrors"] / mea_13["numPhasesDecoded"]) * 100,
-            (mea_14["numPhasesErrors"] / mea_14["numPhasesDecoded"]) * 100,
-            (mea_15["numPhasesErrors"] / mea_15["numPhasesDecoded"]) * 100,
-            (mea_16["numPhasesErrors"] / mea_16["numPhasesDecoded"]) * 100,
-            (mea_17["numPhasesErrors"] / mea_17["numPhasesDecoded"]) * 100,
-            (mea_18["numPhasesErrors"] / mea_18["numPhasesDecoded"]) * 100,
-            (mea_19["numPhasesErrors"] / mea_19["numPhasesDecoded"]) * 100,
-            (mea_12["numPhasesErrors"] / mea_12["numPhasesDecoded"]) * 100,
+            (mea_13["numSymbolErrors"] / mea_13["numSymbolsPossible"]) * 100,
+            (mea_14["numSymbolErrors"] / mea_14["numSymbolsPossible"]) * 100,
+            (mea_15["numSymbolErrors"] / mea_15["numSymbolsPossible"]) * 100,
+            (mea_16["numSymbolErrors"] / mea_16["numSymbolsPossible"]) * 100,
+            (mea_17["numSymbolErrors"] / mea_17["numSymbolsPossible"]) * 100,
+            (mea_18["numSymbolErrors"] / mea_18["numSymbolsPossible"]) * 100,
+            (mea_19["numSymbolErrors"] / mea_19["numSymbolsPossible"]) * 100,
+            (mea_12["numSymbolErrors"] / mea_12["numSymbolsPossible"]) * 100,
         ]
     ]
     return ber

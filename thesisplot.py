@@ -151,8 +151,8 @@ def plot():
     mea_24 = mea_24_xor_2bit.analyze.analyze(mea_24_xor_2bit.analyze.readMeasurements("mea_24_xor_2bit/2bit.json"))
     mea_25 = mea_25_xor_4bit.analyze.analyze(mea_25_xor_4bit.analyze.readMeasurements("mea_25_xor_4bit/4bit.json"))
     mea_27 = mea_27_xor_4bit_lfsr_fix.analyze.analyze(mea_27_xor_4bit_lfsr_fix.analyze.readMeasurements("mea_27_xor_4bit_lfsr_fix/4bit_lfsr.json"))
-    mea_28 = mea_28_xor_4bit_lfsr_ss.analyze.analyze(mea_28_xor_4bit_lfsr_ss.analyze.readMeasurements("mea_28_xor_4bit_lfsr_ss/4bit_ss.json"))
-    mea_29 = mea_29_xor_4bit_hamming_50ms.analyze.analyze(mea_29_xor_4bit_hamming_50ms.analyze.readMeasurements("mea_29_xor_4bit_hamming_50ms/ecc_50ms.json"))
+#    mea_28 = mea_28_xor_4bit_lfsr_ss.analyze.analyze(mea_28_xor_4bit_lfsr_ss.analyze.readMeasurements("mea_28_xor_4bit_lfsr_ss/4bit_ss.json"))
+#    mea_29 = mea_29_xor_4bit_hamming_50ms.analyze.analyze(mea_29_xor_4bit_hamming_50ms.analyze.readMeasurements("mea_29_xor_4bit_hamming_50ms/ecc_50ms.json"))
     mea_30 = mea_30_xor_4bit_feld.analyze.analyze(mea_30_xor_4bit_feld.analyze.readMeasurements("mea_30_xor_4bit_feld/feld.json"))
 
     packetloss = analyze.getPacketLosses()
@@ -172,7 +172,7 @@ def plot():
     plt.close()
 
     # Print hist of jitter
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_11["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_11["msgs"]), float)
     y2 = ((y2) - mea_11_jitter.analyze.NOMINAL_S) * 1000
     y2 = y2[2:] # Delete first, this is an outlier
 
@@ -183,7 +183,7 @@ def plot():
     )
 
     # Print PDF of jitter
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_11["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_11["msgs"]), float)
     y2 = ((y2) - mea_11_jitter.analyze.NOMINAL_S) * 1000
     y2 = y2[2:] # Delete first, this is an outlier
 
@@ -196,14 +196,14 @@ def plot():
     )
 
     # Print delta of 10s
-    ipd = [list(ele["lora_msg_id"] for ele in mea_12["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"])]
+    ipd = [list(ele["loraMsgId"] for ele in mea_12["msgs"]), list(ele["gwTs"]["delta"] for ele in mea_12["msgs"])]
     plot_single_ipd(
         data = ipd,
         filename = "delta_10s.svg",
     )
 
     # Print hist of 10s
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_12["msgs"]), float)
     y2 = ((y2) - mea_12_xor_dpsk_10s.analyze.NOMINAL_S) * 1000
     y2 = y2[y2 > -1000]
 
@@ -215,14 +215,14 @@ def plot():
 
     # Print delta of 100ms
 
-    ipd = [list(ele["lora_msg_id"] for ele in mea_19["msgs"]), list(ele["gw_timestamp_delta"] for ele in mea_19["msgs"])]
+    ipd = [list(ele["loraMsgId"] for ele in mea_19["msgs"]), list(ele["gwTs"]["delta"] for ele in mea_19["msgs"])]
     plot_single_ipd(
         data = ipd,
         filename = "delta_100ms.svg",
     )
 
     # Print hist of 100ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_19["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_19["msgs"]), float)
     y2 = ((y2) - mea_19_xor_dpsk_100ms.analyze.NOMINAL_S) * 1000
     y2 = y2[y2 > -200]
 
@@ -238,7 +238,7 @@ def plot():
     fig.tight_layout(h_pad=2)
 
     # 20ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_13["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_13["msgs"]), float)
     y2 = ((y2) - mea_13_xor_dpsk_20ms.analyze.NOMINAL_S) * 1000
     axs[0][0].hist(y2, bins=mea_13_xor_dpsk_20ms.analyze.HIST_BINS, color='b')
     axs[0][0].set_title("a) 20 ms")
@@ -246,49 +246,49 @@ def plot():
 #    axs[0][0].set_xlabel("ms", fontsize=8)
 
     # 30ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_14["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_14["msgs"]), float)
     y2 = ((y2) - mea_14_xor_dpsk_30ms.analyze.NOMINAL_S) * 1000
     axs[0][1].hist(y2, bins=mea_14_xor_dpsk_30ms.analyze.HIST_BINS, color='b')
     axs[0][1].set_title("b) 30 ms")
 #    axs[0][1].set_xlabel("ms", fontsize=8)
 
     # 40ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_15["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_15["msgs"]), float)
     y2 = ((y2) - mea_15_xor_dpsk_40ms.analyze.NOMINAL_S) * 1000
     axs[1][0].hist(y2, bins=mea_15_xor_dpsk_40ms.analyze.HIST_BINS, color='b')
     axs[1][0].set_title("c) 40 ms")
 #    axs[1][0].set_xlabel("ms", fontsize=8)
 
     # 50ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_16["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_16["msgs"]), float)
     y2 = ((y2) - mea_16_xor_dpsk_50ms.analyze.NOMINAL_S) * 1000
     axs[1][1].hist(y2, bins=mea_16_xor_dpsk_50ms.analyze.HIST_BINS, color='b')
     axs[1][1].set_title("d) 50 ms")
 #    axs[1][2].set_xlabel("ms", fontsize=8)
 
     # 60ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_17["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_17["msgs"]), float)
     y2 = ((y2) - mea_17_xor_dpsk_60ms.analyze.NOMINAL_S) * 1000
     axs[2][0].hist(y2, bins=mea_17_xor_dpsk_60ms.analyze.HIST_BINS, color='b')
     axs[2][0].set_title("e) 60 ms")
 #    axs[2][0].set_xlabel("ms", fontsize=8)
 
     # 70ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_18["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_18["msgs"]), float)
     y2 = ((y2) - mea_18_xor_dpsk_70ms.analyze.NOMINAL_S) * 1000
     axs[2][1].hist(y2, bins=mea_18_xor_dpsk_70ms.analyze.HIST_BINS, color='b')
     axs[2][1].set_title("f) 70 ms")
 #    axs[2][1].set_xlabel("ms", fontsize=8)
 
     # 100ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_19["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_19["msgs"]), float)
     y2 = ((y2) - mea_19_xor_dpsk_100ms.analyze.NOMINAL_S) * 1000
     axs[3][0].hist(y2, bins=mea_19_xor_dpsk_100ms.analyze.HIST_BINS, color='b')
     axs[3][0].set_title("g) 100 ms")
     axs[3][0].set_xlabel("ms", fontsize=8)
 
     # 10 s
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_12["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_12["msgs"]), float)
     y2 = ((y2) - mea_12_xor_dpsk_10s.analyze.NOMINAL_S) * 1000
     axs[3][1].hist(y2, bins=mea_12_xor_dpsk_10s.analyze.HIST_BINS, color='b')
     axs[3][1].set_title("h) 10 s")
@@ -303,7 +303,7 @@ def plot():
     # 100ms delta
 
 
-    ipd = [list(ele["lora_msg_id"] for ele in mea_20["msgs"])[:121], list(ele["gw_timestamp_delta"] for ele in mea_20["msgs"])[:121]]
+    ipd = [list(ele["loraMsgId"] for ele in mea_20["msgs"])[:121], list(ele["gwTs"]["delta"] for ele in mea_20["msgs"])[:121]]
     plot_single_ipd(
         data = ipd,
         filename = "delta_100ms_nojumpback.svg",
@@ -314,7 +314,7 @@ def plot():
     fig.tight_layout(h_pad=2)
 
     # 50ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_21["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_21["msgs"]), float)
     y2 = ((y2) - mea_21_xor_dpsk_nojumpback_50ms.analyze.NOMINAL_S) * 1000
     axs[0].hist(y2, bins=mea_21_xor_dpsk_nojumpback_50ms.analyze.HIST_BINS, color='b')
     axs[0].set_title("a) 50 ms")
@@ -323,7 +323,7 @@ def plot():
 
 
     # 100ms
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_20["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_20["msgs"]), float)
     y2 = ((y2) - mea_20_xor_dpsk_nojumpback_100ms.analyze.NOMINAL_S) * 1000
     axs[1].hist(y2, bins=mea_20_xor_dpsk_nojumpback_100ms.analyze.HIST_BINS, color='b')
     axs[1].set_title("b) 100 ms")
@@ -338,7 +338,7 @@ def plot():
     # plot deltas of 2 bit encoding
 
 
-    ipd = [list(ele["lora_msg_id"] for ele in mea_24["msgs"])[900:1100], list(ele["gw_timestamp_delta"] for ele in mea_24["msgs"])[900:1100]]
+    ipd = [list(ele["loraMsgId"] for ele in mea_24["msgs"])[900:1100], list(ele["gwTs"]["delta"] for ele in mea_24["msgs"])[900:1100]]
     plot_single_ipd(
         data = ipd,
         filename = "delta_2bit.svg",
@@ -354,20 +354,20 @@ def plot():
     ax3 = fig.add_subplot(gs[1,:])
 
     # 2bit
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_24["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_24["msgs"]), float)
     y2 = ((y2) - mea_24_xor_2bit.analyze.NOMINAL_S) * 1000
     ax1.hist(y2, bins=mea_24_xor_2bit.analyze.HIST_BINS, color='b')
     ax1.set_title("a) 2 bit")
     ax1.set_ylabel("frequency")
 
     # 4bit
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_25["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_25["msgs"]), float)
     y2 = ((y2) - mea_25_xor_4bit.analyze.NOMINAL_S) * 1000
     ax2.hist(y2, bins=mea_25_xor_4bit.analyze.HIST_BINS, color='b')
     ax2.set_title("b) 4 bit")
 
     # 8bit
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_22["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_22["msgs"]), float)
     y2 = ((y2) - mea_22_xor_8bit.analyze.NOMINAL_S) * 1000
     ax3.hist(y2, bins=mea_22_xor_8bit.analyze.HIST_BINS, color='b')
     ax3.set_title("c) 8 bit")
@@ -381,7 +381,7 @@ def plot():
 
 
     # 4bit with lfsr
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_27["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_27["msgs"]), float)
     y2 = ((y2) - mea_27_xor_4bit_lfsr_fix.analyze.NOMINAL_S) * 1000
 
     plot_single_hist(
@@ -392,48 +392,48 @@ def plot():
 
     # 4bit with lfsr and spreading
     # Show histogram
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_28["msgs"]), float)
-    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
+#    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_28["msgs"]), float)
+#    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
 
-    plot_single_hist(
-        data=y2,
-        bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS,
-        filename="hist_4bit_ss.svg"
-    )
+#    plot_single_hist(
+#        data=y2,
+#        bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS,
+#        filename="hist_4bit_ss.svg"
+#    )
 
     # Show despreaded histogram
-    y2 = np.array(list(ele["gw_timestamp_delta_despread"] for ele in mea_28["msgs"]), float)
-    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
+#    y2 = np.array(list(ele["gw_timestamp_delta_despread"] for ele in mea_28["msgs"]), float)
+#    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
 
-    plot_single_hist(
-        data=y2,
-        bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS,
-        filename="hist_4bit_ss_despread.svg"
-    )
+#    plot_single_hist(
+#        data=y2,
+#        bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS,
+#        filename="hist_4bit_ss_despread.svg"
+#    )
 
     # Show ecc histogram
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_29["msgs"]), float)
-    y2 = ((y2) - mea_29_xor_4bit_hamming_50ms.analyze.NOMINAL_S) * 1000
+#    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_29["msgs"]), float)
+#    y2 = ((y2) - mea_29_xor_4bit_hamming_50ms.analyze.NOMINAL_S) * 1000
 
-    plot_single_hist(
-        data=y2,
-        bins=mea_29_xor_4bit_hamming_50ms.analyze.HIST_BINS,
-        filename="hist_4bit_ecc.svg"
-    )
+#    plot_single_hist(
+#        data=y2,
+#        bins=mea_29_xor_4bit_hamming_50ms.analyze.HIST_BINS,
+#        filename="hist_4bit_ecc.svg"
+#    )
 
     # Feld temperature/vdd plot
     for msg in mea_30["msgs"]:
-        msg["vdd_V"] = ((msg["mcu_timestamp"] >> 16) & 0xffff)/1000
-        msg["temp_C"] = ((msg["mcu_timestamp"] & 0xffff) / 2**6 ) - 273.15
+        msg["vdd_V"] = ((msg["payload"]["raw"] >> 16) & 0xffff)/1000
+        msg["temp_C"] = ((msg["payload"]["raw"] & 0xffff) / 2**6 ) - 273.15
 
-    max_msgs = int(mea_30["msgs"][-1]["lora_msg_id"])
+    max_msgs = int(mea_30["msgs"][-1]["loraMsgId"])
     msg_received = np.zeros((1, max_msgs+1), bool)
 
     for msg in mea_30["msgs"]:
-        msg_received[0, int(msg["lora_msg_id"])] = True
+        msg_received[0, int(msg["loraMsgId"])] = True
 
     plot_temp_vdd(
-        list(ele["lora_msg_id"] for ele in mea_30["msgs"]),
+        list(ele["loraMsgId"] for ele in mea_30["msgs"]),
         np.array(list(ele["temp_C"] for ele in mea_30["msgs"]), float),
         np.array(list(ele["vdd_V"] for ele in mea_30["msgs"]), float),
         msg_received,
@@ -443,7 +443,7 @@ def plot():
     )
 
     # Feld histogram
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_30["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_30["msgs"]), float)
     y2 = ((y2) - mea_30_xor_4bit_feld.analyze.NOMINAL_S) * 1000
 
     plot_single_hist(
@@ -452,21 +452,21 @@ def plot():
         filename="feld_hist.svg"
     )
 
-    mea_31 = mea_31_xor_4bit_hochstand.analyze.analyze(mea_31_xor_4bit_hochstand.analyze.readMeasurements("mea_31_xor_4bit_hochstand/hochstand.json"), gw_eui="58A0CBFFFE802A21", gw_ts_name="time")
+    mea_31 = mea_31_xor_4bit_hochstand.analyze.analyze(mea_31_xor_4bit_hochstand.analyze.readMeasurements("mea_31_xor_4bit_hochstand/hochstand.json"), gw_eui="58A0CBFFFE802A21", gw_ts_name="gwTs")
 
     # Hochstand temperature/vdd plot
     for msg in mea_31["msgs"]:
-        msg["vdd_V"] = ((msg["mcu_timestamp"] >> 16) & 0xffff)/1000
-        msg["temp_C"] = ((msg["mcu_timestamp"] & 0xffff) / 2**6 ) - 273.15
+        msg["vdd_V"] = ((msg["payload"]["raw"] >> 16) & 0xffff)/1000
+        msg["temp_C"] = ((msg["payload"]["raw"] & 0xffff) / 2**6 ) - 273.15
 
-    max_msgs = int(mea_31["msgs"][-1]["lora_msg_id"])
+    max_msgs = int(mea_31["msgs"][-1]["loraMsgId"])
     msg_received = np.zeros((1, max_msgs+1), bool)
 
     for msg in mea_31["msgs"]:
-        msg_received[0, int(msg["lora_msg_id"])] = True
+        msg_received[0, int(msg["loraMsgId"])] = True
 
     plot_temp_vdd(
-        list(ele["lora_msg_id"] for ele in mea_31["msgs"]),
+        list(ele["loraMsgId"] for ele in mea_31["msgs"]),
         np.array(list(ele["temp_C"] for ele in mea_31["msgs"]), float),
         np.array(list(ele["vdd_V"] for ele in mea_31["msgs"]), float),
         msg_received,
@@ -476,7 +476,7 @@ def plot():
     )
 
     # Hochstand histogram
-    y2 = np.array(list(ele["gw_timestamp_delta"] for ele in mea_31["msgs"]), float)
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_31["msgs"]), float)
     y2 = ((y2) - mea_31_xor_4bit_hochstand.analyze.NOMINAL_S) * 1000
 
     plot_single_hist(
