@@ -224,7 +224,7 @@ def readMessages(data, nominal, tolerance, phaseDelta, bits, printMatches, water
         "possible": 0,
         "errors": 0
         }
-    ecc = {
+    error_correction = {
         "dualBit": 0,   # Invalid
         "singleBit": 0, # Corrected
         "noErr": 0
@@ -278,11 +278,11 @@ def readMessages(data, nominal, tolerance, phaseDelta, bits, printMatches, water
                 elif ecc:
                     msg["extraction"]["eccErrors"], msg["extraction"]["symbol"] = extractSymbol_ecc(msg[gw_ts_name]["delta"], nominal, phaseDelta, tolerance, bits)
                     if (msg["extraction"]["eccErrors"] == 0):
-                        ecc["noErr"] += 1
+                        error_correction["noErr"] += 1
                     elif (msg["extraction"]["eccErrors"] == 1):
-                        ecc["singleBit"] += 1
+                        error_correction["singleBit"] += 1
                     elif (msg["extraction"]["eccErrors"] == 2):
-                        ecc["dualBit"] += 1
+                        error_correction["dualBit"] += 1
 
                 elif not ecc and not spreading:
                     msg["extraction"]["symbol"] = extractSymbol(msg[gw_ts_name]["delta"], nominal, phaseDelta, tolerance, bits)
@@ -293,7 +293,7 @@ def readMessages(data, nominal, tolerance, phaseDelta, bits, printMatches, water
                 if (bits == 1):
                     # Due to DPSK modulation, for 1 bit another subsequent message is needed
                     if ( preMsg["numLost"] == 0 ):
-                        if (preMsg["extraction"]["symbol"] != None):
+                        if (preMsg["extraction"]["symbol"] != None and msg["extraction"]["symbol"] != None):
                             msg["extraction"]["effWatermark"] = preMsg["extraction"]["symbol"] ^ msg["extraction"]["symbol"]
                         symbols["possible"] += 1
                     else:
@@ -324,7 +324,7 @@ def readMessages(data, nominal, tolerance, phaseDelta, bits, printMatches, water
 
         msgs.append(msg)
 
-    return {"msgs": msgs, "numMsgsLost": numMsgsLost, "numSymbolsPossible": symbols["possible"], "numSymbolErrors": symbols["errors"], "ecc": ecc}
+    return {"msgs": msgs, "numMsgsLost": numMsgsLost, "numSymbolsPossible": symbols["possible"], "numSymbolErrors": symbols["errors"], "ecc": error_correction}
 
 def xorshift(lfsr):
     # Hattip to: http://www.retroprogramming.com/2017/07/xorshift-pseudorandom-numbers-in-z80.html
@@ -343,7 +343,9 @@ def printCalculations(res):
 
     y1 = np.array(y1)
 
-    print("Packetloss: \n\t{0} (of {1} sent) = {2:.2f}%".format(res["numMsgsLost"], msgs[-1]["loraMsgId"]+1, (res["numMsgsLost"]/(msgs[-1]["loraMsgId"]+1))*100))
+    msgsSent = msgs[-1]["loraMsgId"]+1
+
+    print("Packetloss: \n\t{0} (of {1} sent) = {2:.2f}%".format(res["numMsgsLost"], msgsSent, (res["numMsgsLost"]/msgsSent)*100))
 
     print("Jitter:")
     print("\tmin:  {0:.2f} ms".format(np.min(y1)))

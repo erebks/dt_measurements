@@ -47,7 +47,7 @@ def plot_single_hist(data, bins, filename, color='b', xlabel='ms', ylabel='frequ
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    plt.savefig(filename)
+    plt.savefig(filename, bbox_inches = "tight")
     if show:
         plt.show()
 
@@ -66,7 +66,7 @@ def plot_single_hist_with_norm(data, mu, sigma, bins, filename, color='b', xlabe
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    plt.savefig(filename)
+    plt.savefig(filename, bbox_inches = "tight")
     if show:
         plt.show()
 
@@ -83,7 +83,7 @@ def plot_single_ipd(data, filename, color='b.-', xlabel='msg', ylabel='IPD at ga
     ax.tick_params('y')
     ax.grid(True)
 
-    plt.savefig(filename)
+    plt.savefig(filename, bbox_inches = "tight")
     if show:
         plt.show()
 
@@ -125,7 +125,7 @@ def plot_temp_vdd(msgs, temp, vdd, msgs_received, filename, xlabel='msg', legend
 
     plt.subplots_adjust(hspace=.0)
 
-    plt.savefig(filename)
+    plt.savefig(filename, bbox_inches = "tight")
     if show:
         plt.show()
 
@@ -151,8 +151,8 @@ def plot():
     mea_24 = mea_24_xor_2bit.analyze.analyze(mea_24_xor_2bit.analyze.readMeasurements("mea_24_xor_2bit/2bit.json"))
     mea_25 = mea_25_xor_4bit.analyze.analyze(mea_25_xor_4bit.analyze.readMeasurements("mea_25_xor_4bit/4bit.json"))
     mea_27 = mea_27_xor_4bit_lfsr_fix.analyze.analyze(mea_27_xor_4bit_lfsr_fix.analyze.readMeasurements("mea_27_xor_4bit_lfsr_fix/4bit_lfsr.json"))
-#    mea_28 = mea_28_xor_4bit_lfsr_ss.analyze.analyze(mea_28_xor_4bit_lfsr_ss.analyze.readMeasurements("mea_28_xor_4bit_lfsr_ss/4bit_ss.json"))
-#    mea_29 = mea_29_xor_4bit_hamming_50ms.analyze.analyze(mea_29_xor_4bit_hamming_50ms.analyze.readMeasurements("mea_29_xor_4bit_hamming_50ms/ecc_50ms.json"))
+    mea_28 = mea_28_xor_4bit_lfsr_ss.analyze.analyze(mea_28_xor_4bit_lfsr_ss.analyze.readMeasurements("mea_28_xor_4bit_lfsr_ss/4bit_ss.json"))
+    mea_29 = mea_29_xor_4bit_hamming_50ms.analyze.analyze(mea_29_xor_4bit_hamming_50ms.analyze.readMeasurements("mea_29_xor_4bit_hamming_50ms/ecc_50ms.json"))
     mea_30 = mea_30_xor_4bit_feld.analyze.analyze(mea_30_xor_4bit_feld.analyze.readMeasurements("mea_30_xor_4bit_feld/feld.json"))
 
     packetloss = analyze.getPacketLosses()
@@ -199,7 +199,7 @@ def plot():
     ipd = [list(ele["loraMsgId"] for ele in mea_12["msgs"]), list(ele["gwTs"]["delta"] for ele in mea_12["msgs"])]
     plot_single_ipd(
         data = ipd,
-        filename = "delta_10s.svg",
+        filename = "delta_10s.svg"
     )
 
     # Print hist of 10s
@@ -218,7 +218,7 @@ def plot():
     ipd = [list(ele["loraMsgId"] for ele in mea_19["msgs"]), list(ele["gwTs"]["delta"] for ele in mea_19["msgs"])]
     plot_single_ipd(
         data = ipd,
-        filename = "delta_100ms.svg",
+        filename = "delta_100ms.svg"
     )
 
     # Print hist of 100ms
@@ -392,34 +392,34 @@ def plot():
 
     # 4bit with lfsr and spreading
     # Show histogram
-#    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_28["msgs"]), float)
-#    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_28["msgs"]), float)
+    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
 
-#    plot_single_hist(
-#        data=y2,
-#        bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS,
-#        filename="hist_4bit_ss.svg"
-#    )
+    plot_single_hist(
+        data=y2,
+        bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS,
+        filename="hist_4bit_ss.svg"
+    )
 
     # Show despreaded histogram
-#    y2 = np.array(list(ele["gw_timestamp_delta_despread"] for ele in mea_28["msgs"]), float)
-#    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
+    y2 = np.array(list(ele["gwTs"]["despreaded"] for ele in mea_28["msgs"]), float)
+    y2 = ((y2) - mea_28_xor_4bit_lfsr_ss.analyze.NOMINAL_S) * 1000
 
-#    plot_single_hist(
-#        data=y2,
-#        bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS,
-#        filename="hist_4bit_ss_despread.svg"
-#    )
+    plot_single_hist(
+        data=y2,
+        bins=mea_28_xor_4bit_lfsr_ss.analyze.HIST_BINS,
+        filename="hist_4bit_ss_despread.svg"
+    )
 
     # Show ecc histogram
-#    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_29["msgs"]), float)
-#    y2 = ((y2) - mea_29_xor_4bit_hamming_50ms.analyze.NOMINAL_S) * 1000
+    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_29["msgs"]), float)
+    y2 = ((y2) - mea_29_xor_4bit_hamming_50ms.analyze.NOMINAL_S) * 1000
 
-#    plot_single_hist(
-#        data=y2,
-#        bins=mea_29_xor_4bit_hamming_50ms.analyze.HIST_BINS,
-#        filename="hist_4bit_ecc.svg"
-#    )
+    plot_single_hist(
+        data=y2,
+        bins=mea_29_xor_4bit_hamming_50ms.analyze.HIST_BINS,
+        filename="hist_4bit_ecc.svg"
+    )
 
     # Feld temperature/vdd plot
     for msg in mea_30["msgs"]:

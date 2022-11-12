@@ -41,9 +41,7 @@ def plot():
     # Check if messages are ordered correctly
     msg_id_head = 0
     for msg in msgs:
-        if (msg_id_head+1 < msg["loraMsgId"]):
-            print("{0} Packet(s) missing at {1}".format(msg["loraMsgId"] - (msg_id_head+1), msg["loraMsgId"]))
-        elif (msg_id_head+1 > msg["loraMsgId"]):
+        if (msg_id_head+1 > msg["loraMsgId"]):
             print("Something is very wrong here! head: {0} id: {1}".format(msg_id_head, msg["loraMsgId"]))
         msg_id_head = msg["loraMsgId"]
 
