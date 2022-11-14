@@ -171,17 +171,6 @@ def plot():
     plt.cla()
     plt.close()
 
-    # Print hist of jitter
-    y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_11["msgs"]), float)
-    y2 = ((y2) - mea_11_jitter.analyze.NOMINAL_S) * 1000
-    y2 = y2[2:] # Delete first, this is an outlier
-
-    plot_single_hist(
-        data=y2,
-        bins=mea_11_jitter.analyze.HIST_BINS,
-        filename="hist_jitter.svg"
-    )
-
     # Print PDF of jitter
     y2 = np.array(list(ele["gwTs"]["delta"] for ele in mea_11["msgs"]), float)
     y2 = ((y2) - mea_11_jitter.analyze.NOMINAL_S) * 1000
@@ -486,6 +475,41 @@ def plot():
     )
 
 #    mea_31 = mea_31_xor_4bit_hochstand.analyze.analyze(mea_31_xor_4bit_hochstand.analyze.readMeasurements("mea_31_xor_4bit_hochstand/hochstand.json"), gw_eui="58A0CBFFFE802A21", gw_ts_name="time")
+
+    # Jitter with us_timestamp
+    ipd = [list(ele["loraMsgId"] for ele in mea_11["msgs"])[239:298], list(ele["modemTs"]["seconds"] for ele in mea_11["msgs"])[239:298]]
+
+    plot_single_ipd(
+        data = ipd,
+        filename = "usts_jitter_abs.svg",
+        ylabel="µs timestamp [s]"
+    )
+
+    ipd = [list(ele["loraMsgId"] for ele in mea_11["msgs"]), list(ele["modemTs"]["delta"] for ele in mea_11["msgs"])]
+    plot_single_ipd(
+        data = ipd,
+        filename = "usts_jitter_ipd.svg"
+    )
+
+    y2 = np.array(list(ele["modemTs"]["delta"] for ele in mea_11["msgs"]), float)
+    y2 = y2[y2>299] # Delete first, this is an outlier
+    y2 = ((y2) - mea_11_jitter.analyze.NOMINAL_S) * 1000
+
+    plot_single_hist(
+        data=y2,
+        bins=mea_11_jitter.analyze.HIST_BINS,
+        filename="usts_jitter_hist.svg"
+    )
+
+    y2 = np.array(list(ele["modemTs"]["delta"] for ele in mea_13["msgs"]), float)
+    y2 = ((y2) - mea_13_xor_dpsk_20ms.analyze.NOMINAL_S) * 1000
+    y2 = y2[y2>-500]
+
+    plot_single_hist(
+        data=y2,
+        bins=mea_13_xor_dpsk_20ms.analyze.HIST_BINS,
+        filename="usts_20ms_hist.svg"
+    )
 
 
 if __name__ == "__main__":
